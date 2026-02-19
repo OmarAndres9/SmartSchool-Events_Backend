@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartschool-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=smartschool
+      - DB_USERNAME=smartschool
+      - DB_PASSWORD=root
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=null
+    networks:
+      - smartschool-network
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: smartschool-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "443:443"
+    networks:
+      - smartschool-network
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartschool-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smartschool
+      POSTGRES_USER: smartschool
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - smartschool-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartschool"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: smartschool-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - smartschool-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  smartschool-network:
+    driver: bridge
+                                                                                                                                                                                                                                                                                                                                                                      
