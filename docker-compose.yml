@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartschool-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=smartschool
+      - DB_USERNAME=smartschool
+      - DB_PASSWORD=root
+    networks:
+      - smartschool-network
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15
+    container_name: smartschool-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smartschool
+      POSTGRES_USER: smartschool
+      POSTGRES_PASSWORD: root
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - smartschool-network
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    container_name: smartschool-redis
+    restart: unless-stopped
+    networks:
+      - smartschool-network
+    ports:
+      - "6379:6379"
+
+networks:
+  smartschool-network:
+    driver: bridge
+
+volumes:
+  db-data:

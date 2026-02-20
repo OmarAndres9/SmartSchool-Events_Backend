@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.gitignore
+.env
+.env.local
+.DS_Store
+*.log
+/vendor
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+.vscode
+.idea
