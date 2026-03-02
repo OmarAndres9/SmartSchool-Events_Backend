@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\PermissionController;
 Route::apiResource('roles', RoleController::class);
 Route::apiResource('permissions', PermissionController::class);
 
+
+
+
+
 // Ejemplo de endpoint para asignar un rol a un usuario
 Route::post('users/{user}/roles', function (Request $request, \App\Models\User $user) {
     $request->validate([
@@ -22,3 +26,9 @@ Route::post('users/{user}/roles', function (Request $request, \App\Models\User $
         'user' => $user->load('roles')
     ]);
 });
+
+
+
+//rutas de recursos
+use App\Http\Controllers\RecursosController;
+Route::apiResource('recursos', RecursosController::class);
