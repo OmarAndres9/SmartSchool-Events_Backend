@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 # Dependencias
 RUN apt-get update && apt-get install -y \
@@ -26,6 +26,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-EXPOSE 9000
+# habilitar mod_rewrite y ajustar DocumentRoot a la carpeta public de Laravel
+RUN a2enmod rewrite && \
+    sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
 
-CMD ["php-fpm"]
+# otorgar permisos a storage y cache para el usuario de Apache
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+
+# puerto que exponemos para HTTP
+EXPOSE 80
+
+# Apache se ejecuta por defecto en la imagen base
+RUN php artisan key:generate --ansi
