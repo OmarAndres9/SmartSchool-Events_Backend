@@ -11,6 +11,12 @@ use App\Repository\Eloquent\RecursosRepository;
 use App\Repository\Interfaces\UsuariosInterfaces;
 use App\Repository\Eloquent\UsuariosRepository;
 
+
+//macheo de eventos
+use App\Repository\Interfaces\EventosInterfaces;
+use App\Repository\Eloquent\EventosRepository;
+//
+
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -20,6 +26,8 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(RecursosInterfaces::class, RecursosRepository::class);
         $this->app->bind(UsuariosInterfaces::class, UsuariosRepository::class);
+        $this->app->bind(EventosInterfaces::class, EventosRepository::class);
+    
     }
 
     /**
