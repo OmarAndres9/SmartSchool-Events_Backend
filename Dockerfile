@@ -37,5 +37,4 @@ RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
 # puerto que exponemos para HTTP
 EXPOSE 80
 
-# Apache se ejecuta por defecto en la imagen base
-RUN php artisan key:generate --ansi
+
