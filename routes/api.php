@@ -32,3 +32,8 @@ Route::post('users/{user}/roles', function (Request $request, \App\Models\User $
 //rutas de recursos
 use App\Http\Controllers\RecursosController;
 Route::apiResource('recursos', RecursosController::class);
+
+
+//route de usuarios
+use App\Http\Controllers\UsuariosController;
+Route::apiResource('usuarios', UsuariosController::class);
