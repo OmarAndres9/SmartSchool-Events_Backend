@@ -17,5 +17,12 @@ class Eventos extends Model
         'modalidad',
         'grupo_destinado',
         'creado_por',
+
     ];
+    public function recursos()
+    {
+        return $this->belongsToMany(Recurso::class, '_evento_recurso_', 'evento_id', 'recurso_id')
+                    ->withPivot('cantidad')
+                    ->withTimestamps();
+}
 }
