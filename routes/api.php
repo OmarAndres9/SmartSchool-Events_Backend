@@ -41,3 +41,7 @@ Route::apiResource('usuarios', UsuariosController::class);
 //route de eventos
 use App\Http\Controllers\EventosController;
 Route::apiResource('eventos', EventosController::class);
+
+//route de reportes
+use App\Http\Controllers\ReportesController;
+Route::apiResource('reportes', ReportesController::class);
