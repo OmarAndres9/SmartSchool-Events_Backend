@@ -45,3 +45,8 @@ Route::apiResource('eventos', EventosController::class);
 //route de reportes
 use App\Http\Controllers\ReportesController;
 Route::apiResource('reportes', ReportesController::class);
+
+
+//route de notificaciones
+use App\Http\Controllers\NotificacionesController;
+Route::apiResource('notificaciones', NotificacionesController::class);
