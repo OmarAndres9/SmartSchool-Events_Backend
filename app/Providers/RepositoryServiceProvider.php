@@ -22,6 +22,7 @@ use App\Repository\Eloquent\ReporteRepository;
 use App\Repository\Interfaces\NotificacionesInterfaces;
 use App\Repository\Eloquent\NotificacionesRepository;
 
+//macheo de recuperacion
 
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -33,6 +34,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(EventosInterfaces::class, EventosRepository::class);
         $this->app->bind(ReporteInterfaces::class, ReporteRepository::class);
         $this->app->bind(NotificacionesInterfaces::class, NotificacionesRepository::class);
+        $this->app->bind(MailService::class, fn() => new MailService());
+        $this->app->bind(PasswordResetService::class, fn($app) => new PasswordResetService(
+            $app->make(MailService::class)
+        ));
     }
 
     public function boot(): void
