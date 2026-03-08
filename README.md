@@ -1,59 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SmartSchool Backend – Sistema de Gestión de Eventos Escolares
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Sistema de Gestión de Eventos Escolares](./evento_escolar_al_aire_libre.png)
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📌 Descripción
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+El **Backend de SmartSchool** está desarrollado con **PHP y Laravel** y se encarga de gestionar la lógica del sistema, procesar solicitudes y administrar la base de datos del Sistema de Gestión de Eventos Escolares.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Este backend expone una **API REST** que permite al frontend interactuar con la plataforma para registrar eventos, gestionar usuarios, administrar recursos y enviar notificaciones.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🎯 Objetivo
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Desarrollar un backend robusto y escalable que permita centralizar la información y automatizar los procesos relacionados con la gestión de eventos escolares.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ⚙️ Funcionalidades Principales
 
-### Premium Partners
+El backend permite:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Gestión de usuarios (registro, autenticación y roles).
+- Gestión de eventos escolares.
+- Asociación de recursos a eventos.
+- Gestión de notificaciones.
+- Generación de reportes.
+- Administración de información institucional.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🛠️ Tecnologías Utilizadas
 
-## Code of Conduct
+- **PHP**
+- **Laravel**
+- **PostgreSQL**
+- **API REST**
+- **JSON**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🗄️ Base de Datos
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+El sistema utiliza **PostgreSQL** para almacenar información relacionada con:
 
-## License
+- Usuarios
+- Eventos
+- Recursos
+- Notificaciones
+- Reportes
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+# 🏗️ Arquitectura del Sistema
+
+El backend sigue una arquitectura por capas para mantener una separación clara de responsabilidades dentro del sistema.
+Cliente
+│
+▼
+Controllers
+│
+▼
+Services
+│
+▼
+Repository
+│
+▼
+Models
+│
+▼
+Base de Datos (PostgreSQL)
+
+
+---
+
+## 📚 Descripción de Capas
+
+### Controllers
+Se encargan de recibir las solicitudes HTTP y enviar respuestas al cliente.  
+Delegan la lógica de negocio a los **Services**.
+
+### Requests
+Gestionan la validación de datos enviados por el cliente antes de que lleguen a los controladores.
+
+### Resources
+Transforman los modelos en respuestas JSON estructuradas para la API.
+
+### Services
+Contienen la **lógica de negocio del sistema**, coordinando operaciones entre controladores y repositorios.
+
+### Repository
+Encapsula el acceso a datos y las consultas a la base de datos, manteniendo separada la lógica de persistencia.
+
+### Models
+Representan las entidades de la base de datos utilizando **Eloquent ORM**.
+
+### Providers
+Registran servicios dentro del contenedor de dependencias de Laravel.
+
+### Database
+Contiene las **migraciones y seeders** utilizados para definir y poblar la base de datos.
+
+### Routes
+Define los endpoints disponibles de la API.
+
+---
+
