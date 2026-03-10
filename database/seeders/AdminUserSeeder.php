@@ -17,7 +17,7 @@ class AdminUserSeeder extends Seeder
 
         // Crea el usuario admin
         $admin = \App\Models\User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'Administrador@gmail.com'],
             [
                 'name' => 'Administrador',
                 'password' => \Illuminate\Support\Facades\Hash::make('admin1234'), // Contraseña: admin1234

@@ -19,6 +19,9 @@ use App\Repository\Interfaces\ReporteInterfaces;
 use App\Repository\Interfaces\UsuariosInterfaces;
 use Illuminate\Support\ServiceProvider;
 
+use App\Repository\Eloquent\AuthRepository;
+use App\Repository\Interfaces\AuthInterfaces;
+
 class RepositoryServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -28,6 +31,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(EventosInterfaces::class, EventosRepository::class);
         $this->app->bind(ReporteInterfaces::class, ReporteRepository::class);
         $this->app->bind(NotificacionesInterfaces::class, NotificacionesRepository::class);
+        $this->app->bind(AuthInterfaces::class, AuthRepository::class);
     }
 
     public function boot(): void {}
