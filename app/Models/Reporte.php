@@ -14,7 +14,7 @@ class Reporte extends Model
         'fecha',
         'estado',
         'id_usuario',
-        'id_evento'
+        'id_evento',
     ];
 
     public function usuario()

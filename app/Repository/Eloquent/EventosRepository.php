@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Repository\Eloquent;
-use App\Repository\Interfaces\EventosInterfaces;
+
 use App\Models\Eventos;
+use App\Repository\Interfaces\EventosInterfaces;
 
 class EventosRepository implements EventosInterfaces
 {
@@ -24,18 +25,22 @@ class EventosRepository implements EventosInterfaces
     public function Eventosupdate($id, $data)
     {
         $model = Eventos::find($id);
-        if (!$model) return null;
+        if (! $model) {
+            return null;
+        }
         $model->update($data);
+
         return $model;
     }
 
     public function Eventosdelete($id)
     {
         $model = Eventos::find($id);
-        if (!$model) return false;
+        if (! $model) {
+            return false;
+        }
         $model->delete();
+
         return true;
     }
 }
-
-

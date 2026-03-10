@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repository\Eloquent;
 
 use App\Models\Recursos;
@@ -24,17 +25,22 @@ class RecursosRepository implements RecursosInterfaces
     public function Recursosupdate($id, $data)
     {
         $model = Recursos::find($id);
-        if (!$model) return null;
+        if (! $model) {
+            return null;
+        }
         $model->update($data);
+
         return $model;
     }
 
     public function Recursosdelete($id)
     {
         $model = Recursos::find($id);
-        if (!$model) return false;
+        if (! $model) {
+            return false;
+        }
         $model->delete();
+
         return true;
     }
 }
-

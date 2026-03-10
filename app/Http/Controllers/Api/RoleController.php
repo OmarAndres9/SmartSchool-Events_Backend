@@ -14,6 +14,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->get();
+
         return response()->json($roles);
     }
 
@@ -24,7 +25,7 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|string|unique:roles,name',
-            'permissions' => 'nullable|array'
+            'permissions' => 'nullable|array',
         ]);
 
         $role = Role::create(['name' => $request->name]);
@@ -42,6 +43,7 @@ class RoleController extends Controller
     public function show(string $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+
         return response()->json($role);
     }
 
@@ -53,8 +55,8 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|unique:roles,name,' . $role->id,
-            'permissions' => 'nullable|array'
+            'name' => 'required|string|unique:roles,name,'.$role->id,
+            'permissions' => 'nullable|array',
         ]);
 
         $role->update(['name' => $request->name]);

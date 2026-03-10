@@ -18,7 +18,7 @@ class AuthenticateApi
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            if (!$user) {
+            if (! $user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
@@ -28,6 +28,7 @@ class AuthenticateApi
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['error' => 'Token exception'], 401);
         }
+
         return $next($request);
     }
 }

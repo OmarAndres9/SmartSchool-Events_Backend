@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Eventos extends Model
 {
     protected $table = 'eventos';
-    protected $fillable =[
+
+    protected $fillable = [
         'nombre',
         'descripcion',
         'fecha_inicio',
@@ -19,10 +20,11 @@ class Eventos extends Model
         'creado_por',
 
     ];
+
     public function recursos()
     {
         return $this->belongsToMany(Recurso::class, '_evento_recurso_', 'evento_id', 'recurso_id')
-                    ->withPivot('cantidad')
-                    ->withTimestamps();
-}
+            ->withPivot('cantidad')
+            ->withTimestamps();
+    }
 }

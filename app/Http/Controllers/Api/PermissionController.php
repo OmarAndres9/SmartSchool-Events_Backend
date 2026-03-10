@@ -14,6 +14,7 @@ class PermissionController extends Controller
     public function index()
     {
         $permissions = Permission::all();
+
         return response()->json($permissions);
     }
 
@@ -37,6 +38,7 @@ class PermissionController extends Controller
     public function show(string $id)
     {
         $permission = Permission::findOrFail($id);
+
         return response()->json($permission);
     }
 
@@ -48,7 +50,7 @@ class PermissionController extends Controller
         $permission = Permission::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|unique:permissions,name,' . $permission->id,
+            'name' => 'required|string|unique:permissions,name,'.$permission->id,
         ]);
 
         $permission->update(['name' => $request->name]);

@@ -1,11 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Requests\NotificacionesRequest;
 use App\Http\Resources\NotificacionesResource;
 use App\Services\NotificacionesService;
-
-
 use Illuminate\Http\Request;
 
 class NotificacionesController extends Controller
@@ -20,6 +19,7 @@ class NotificacionesController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 15);
+
         return NotificacionesResource::collection($this->notificacionesService->NotificacionesgetAll($perPage));
     }
 

@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class EventosResource extends JsonResource
 {
-    
     public function toArray(Request $request): array
     {
         return [

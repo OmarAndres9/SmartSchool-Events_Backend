@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('grupo_destinado');
 
             $table->foreignId('creado_por')
-                  ->constrained('users')
-                  ->onDelete('cascade');
+                ->constrained('users')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

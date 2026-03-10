@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('_evento_recurso_', function (Blueprint $table) {
             $table->id();
             $table->foreignId('evento_id')
-                  ->constrained('eventos')
-                  ->onDelete('cascade');
+                ->constrained('eventos')
+                ->onDelete('cascade');
             $table->foreignId('recurso_id')
-                  ->constrained('_recursos__table')
-                  ->onDelete('cascade');
+                ->constrained('_recursos__table')
+                ->onDelete('cascade');
             $table->integer('cantidad');
             $table->timestamps();
 

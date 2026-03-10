@@ -1,28 +1,23 @@
 <?php
 
+use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventosController;
+use App\Http\Controllers\NotificacionesController;
+use App\Http\Controllers\RecursosController;
+use App\Http\Controllers\ReportesController;
+use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\RoleController;
-use App\Http\Controllers\Api\PermissionController;
-
-Route::apiResource('roles', RoleController::class);
-Route::apiResource('permissions', PermissionController::class);
-
-
-
-
-
-use App\Http\Controllers\RecursosController;
-use App\Http\Controllers\UsuariosController;
-use App\Http\Controllers\EventosController;
-use App\Http\Controllers\ReportesController;
-use App\Http\Controllers\NotificacionesController;
-use App\Http\Controllers\AuthController;
 
 // -----------------------------------------------------------------------
 // Rutas Públicas (No requieren autenticación)
 // -----------------------------------------------------------------------
 Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
+Route::post('password/email', [\App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [\App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
 
 // -----------------------------------------------------------------------
 // Rutas Protegidas (Requieren autenticación)
@@ -50,9 +45,10 @@ Route::middleware('auth:api')->group(function () {
         Route::post('users/{user}/roles', function (Request $request, \App\Models\User $user) {
             $request->validate(['roles' => 'required|array']);
             $user->syncRoles($request->roles);
+
             return response()->json([
                 'message' => 'Roles asignados correctamente',
-                'user' => $user->load('roles')
+                'user' => $user->load('roles'),
             ]);
         });
     });
@@ -69,27 +65,11 @@ Route::middleware('auth:api')->group(function () {
 
     // -------------------------------------------------------------------
     // Rutas para Usuarios
-    // Si los usuarios regulares solo deben leer eventos, se pueden separar 
+    // Si los usuarios regulares solo deben leer eventos, se pueden separar
     // las rutas de lectura de las de escritura aquí.
-    // Por el momento, el middleware anterior controla acceso total. 
-    // Puedes agregar excepciones como: 
+    // Por el momento, el middleware anterior controla acceso total.
+    // Puedes agregar excepciones como:
     // Route::get('eventos', [EventosController::class, 'index'])->middleware('role:admin,organizador,usuario');
     // -------------------------------------------------------------------
 
-});
-
-
-//route de auth
-use App\Http\Controllers\AuthController;
-Route::apiResource('auth', AuthController::class);
-
-Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout']);
-
-Route::middleware('auth:api')->group(function () {
-    Route::get('me', [AuthController::class, 'me']);
-});
-
-Route::middleware('auth:api')->group(function () {
-    Route::get('me', [AuthController::class, 'me']);
 });
