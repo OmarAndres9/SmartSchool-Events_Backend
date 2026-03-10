@@ -19,9 +19,10 @@ class AutService
 
         if ($token) {
             $user = $this->authRepository->GetUser();
+
             return [
                 'token' => $token,
-                'user' => $user
+                'user' => $user,
             ];
         }
 

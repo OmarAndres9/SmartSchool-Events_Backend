@@ -7,7 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReporteResource extends JsonResource
 {
-   
     public function toArray(Request $request): array
     {
         return [

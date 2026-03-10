@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Repository\Eloquent;
+
 use App\Models\Notificaciones;
 use App\Repository\Interfaces\NotificacionesInterfaces;
 
@@ -23,16 +25,22 @@ class NotificacionesRepository implements NotificacionesInterfaces
     public function Notificacionesupdate($id, $data)
     {
         $model = Notificaciones::find($id);
-        if (!$model) return null;
+        if (! $model) {
+            return null;
+        }
         $model->update($data);
+
         return $model;
     }
 
     public function Notificacionesdelete($id)
     {
         $model = Notificaciones::find($id);
-        if (!$model) return false;
+        if (! $model) {
+            return false;
+        }
         $model->delete();
+
         return true;
     }
 }

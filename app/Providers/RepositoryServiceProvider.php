@@ -1,28 +1,23 @@
 <?php
 
 namespace App\Providers;
-use Illuminate\Support\ServiceProvider;
-//macheo de recursos
-use App\Repository\Interfaces\RecursosInterfaces;
-use App\Repository\Eloquent\RecursosRepository;
 
-//macheo de usuarios
-use App\Repository\Interfaces\UsuariosInterfaces;
-use App\Repository\Eloquent\UsuariosRepository;
-
-//macheo de eventos
-use App\Repository\Interfaces\EventosInterfaces;
 use App\Repository\Eloquent\EventosRepository;
-
-//macheo de reportes
-use App\Repository\Interfaces\ReporteInterfaces;
-use App\Repository\Eloquent\ReporteRepository;
-
-//macheo de notificaciones
-use App\Repository\Interfaces\NotificacionesInterfaces;
+// macheo de recursos
 use App\Repository\Eloquent\NotificacionesRepository;
-
-
+use App\Repository\Eloquent\RecursosRepository;
+// macheo de usuarios
+use App\Repository\Eloquent\ReporteRepository;
+use App\Repository\Eloquent\UsuariosRepository;
+// macheo de eventos
+use App\Repository\Interfaces\EventosInterfaces;
+use App\Repository\Interfaces\NotificacionesInterfaces;
+// macheo de reportes
+use App\Repository\Interfaces\RecursosInterfaces;
+use App\Repository\Interfaces\ReporteInterfaces;
+// macheo de notificaciones
+use App\Repository\Interfaces\UsuariosInterfaces;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -35,7 +30,5 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(NotificacionesInterfaces::class, NotificacionesRepository::class);
     }
 
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 }

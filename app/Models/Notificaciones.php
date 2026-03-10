@@ -15,6 +15,6 @@ class Notificaciones extends Model
         'canal',
         'fecha_creacion',
         'id_usuario',
-        'id_evento'
+        'id_evento',
     ];
 }

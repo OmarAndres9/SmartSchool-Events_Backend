@@ -28,7 +28,7 @@ class NotificacionesRequest extends FormRequest
             'canal' => 'required|string|max:50',
             'fecha_creacion' => 'required|date',
             'id_usuario' => 'required|exists:users,id',
-            'id_evento' => 'nullable|exists:eventos,id'
+            'id_evento' => 'nullable|exists:eventos,id',
         ];
     }
 }

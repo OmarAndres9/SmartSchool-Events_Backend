@@ -22,12 +22,12 @@ class UsuariosRequest extends FormRequest
     public function rules(): array
     {
         $userId = $this->route('id');
-        
+
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email' . ($userId ? ',' . $userId : ''),
+            'email' => 'required|string|email|max:255|unique:users,email'.($userId ? ','.$userId : ''),
             'password' => $userId ? 'sometimes|string|min:8' : 'required|string|min:8',
-            'documento' => 'required|string|max:12|unique:users,documento' . ($userId ? ',' . $userId : ''),
+            'documento' => 'required|string|max:12|unique:users,documento'.($userId ? ','.$userId : ''),
             'tipo_documento' => 'required|string|max:255',
         ];
     }

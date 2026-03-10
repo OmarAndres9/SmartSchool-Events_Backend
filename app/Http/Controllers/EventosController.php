@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EventosRequest;
 use App\Http\Resources\EventosResource;
 use App\Services\EventosService;
-use App\Http\Requests\EventosRequest;
 use Illuminate\Http\Request;
 
 class EventosController extends Controller
@@ -34,15 +34,15 @@ class EventosController extends Controller
         $evento = $this->eventosService->create($data);
 
         return (new EventosResource($evento))
-                ->response()
-                ->setStatusCode(201);
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show($id)
     {
         $evento = $this->eventosService->getById($id);
 
-        if (!$evento) {
+        if (! $evento) {
             return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 
@@ -55,7 +55,7 @@ class EventosController extends Controller
 
         $evento = $this->eventosService->update($id, $data);
 
-        if (!$evento) {
+        if (! $evento) {
             return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 
@@ -66,7 +66,7 @@ class EventosController extends Controller
     {
         $deleted = $this->eventosService->delete($id);
 
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 

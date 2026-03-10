@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('notificaciones', function (Blueprint $table) {
             $table->id();
             $table->string('titulo');
-            $table->string('mensaje')
+            $table->string('mensaje');
             $table->string('tipo');
             $table->string('canal');
-            $table->datetime('fecha_creacion');
+            $table->dateTime('fecha_creacion');
             $table->unsignedBigInteger('id_usuario');
             $table->foreign('id_usuario')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('id_evento')->nullable();
