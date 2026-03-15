@@ -6,29 +6,30 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class NotificacionesRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'titulo' => 'required|string|max:255',
-            'mensaje' => 'required|string',
-            'tipo' => 'required|string|max:50',
-            'canal' => 'required|string|max:50',
-            'fecha_creacion' => 'required|date',
-            'id_usuario' => 'required|exists:users,id',
-            'id_evento' => 'nullable|exists:eventos,id',
+            'titulo'         => 'required|string|max:255',
+            'mensaje'        => 'required|string',
+            'tipo'           => 'required|string|in:success,warning,danger,info',
+            'canal'          => 'required|string|in:email,sms,app,push',
+            // FIX: estos los inyecta el controller automáticamente
+            'fecha_creacion' => 'sometimes|date',
+            'id_usuario'     => 'sometimes|exists:users,id',
+            'id_evento'      => 'nullable|exists:eventos,id',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'tipo.in'  => 'El tipo debe ser: success, warning, danger o info.',
+            'canal.in' => 'El canal debe ser: email, sms, app o push.',
         ];
     }
 }

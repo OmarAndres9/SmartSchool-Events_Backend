@@ -4,61 +4,64 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ReporteRequest;
 use App\Http\Resources\ReporteResource;
-use App\Repository\Interfaces\ReporteInterfaces;
+use App\Services\ReporteService;
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReportesController extends Controller
 {
-    protected $reporteRepository;
+    // FIX: usaba ReporteInterfaces directamente — saltaba la capa Service
+    protected $reporteService;
 
-    public function __construct(ReporteInterfaces $reporteRepository)
+    public function __construct(ReporteService $reporteService)
     {
-        $this->reporteRepository = $reporteRepository;
-
+        $this->reporteService = $reporteService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $reportes = $this->reporteRepository->getAllReportes();
-
+        $reportes = $this->reporteService->getAllReportes();
         return ReporteResource::collection($reportes);
     }
 
     public function store(ReporteRequest $request)
     {
         $data = $request->validated();
-        $reporte = $this->reporteRepository->createReporte($data);
 
-        return new ReporteResource($reporte);
+        // FIX: asignar automáticamente el usuario autenticado si no viene en el request
+        if (empty($data['id_usuario'])) {
+            $data['id_usuario'] = JWTAuth::user()->id;
+        }
+
+        $reporte = $this->reporteService->createReporte($data);
+        return (new ReporteResource($reporte))->response()->setStatusCode(201);
     }
 
     public function show($id)
     {
-        $reporte = $this->reporteRepository->getReporteById($id);
+        $reporte = $this->reporteService->getReporteById($id);
         if (! $reporte) {
             return response()->json(['message' => 'Reporte no encontrado'], 404);
         }
-
         return new ReporteResource($reporte);
     }
 
     public function update(ReporteRequest $request, $id)
     {
         $data = $request->validated();
-        $reporte = $this->reporteRepository->updateReporte($id, $data);
+        $reporte = $this->reporteService->updateReporte($id, $data);
         if (! $reporte) {
             return response()->json(['message' => 'Reporte no encontrado'], 404);
         }
-
         return new ReporteResource($reporte);
     }
 
     public function destroy($id)
     {
-        $deleted = $this->reporteRepository->deleteReporte($id);
+        $deleted = $this->reporteService->deleteReporte($id);
         if (! $deleted) {
             return response()->json(['message' => 'Reporte no encontrado'], 404);
         }
-
-        return response()->json(['message' => 'Reporte eliminado correctamente']);
+        return response()->json(null, 204);
     }
 }

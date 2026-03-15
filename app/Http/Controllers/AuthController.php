@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthRequest;
 use App\Services\AutService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -18,31 +21,33 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'documento' => 'required|string|max:12|unique:users',
-            'tipo_documento' => 'required|string|max:255',
-            'rol' => 'required|string',
+            'name'           => 'required|string|max:255',
+            'email'          => 'required|string|email|max:255|unique:users',
+            'password'       => 'required|string|min:6|confirmed',
+            'documento'      => 'required|string|max:12|unique:users',
+            'tipo_documento' => 'required|string|max:10',
+            'rol'            => 'required|string',
         ]);
 
-        $user = \App\Models\User::create([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'password' => \Illuminate\Support\Facades\Hash::make($validatedData['password']),
-            'documento' => $validatedData['documento'],
+        $user = User::create([
+            'name'           => $validatedData['name'],
+            'email'          => $validatedData['email'],
+            'password'       => Hash::make($validatedData['password']),
+            'documento'      => $validatedData['documento'],
             'tipo_documento' => $validatedData['tipo_documento'],
         ]);
 
-        // Clean user role input to match database roles if needed (lowercase)
+        // FIX: buscar el rol con guard_name='api' para que coincida con el seeder
         $roleName = strtolower($validatedData['rol']);
-        if (\Spatie\Permission\Models\Role::where('name', $roleName)->exists()) {
-            $user->assignRole($roleName);
+        $role = Role::where('name', $roleName)->where('guard_name', 'api')->first();
+
+        if ($role) {
+            $user->assignRole($role);
         }
 
         return response()->json([
             'message' => 'Usuario registrado exitosamente',
-            'user' => $user
+            'user'    => $user->load('roles'),
         ], 201);
     }
 
@@ -53,22 +58,20 @@ class AuthController extends Controller
         try {
             $result = $this->authService->login($credentials);
 
-            $user = $result['user'];
-            $token = $result['token'];
+            return response()->json([
+                'message' => 'Login exitoso',
+                'user'    => $result['user'],
+                'token'   => $result['token'],
+            ], 200);
+
+        } catch (\Exception $e) {
+            $isInvalidCredentials = $e->getMessage() === 'Invalid credentials';
 
             return response()->json([
-                'message' => 'Login successful',
-                'user' => $user,
-                'token' => $token,
-            ], 200);
-        } catch (\Exception $e) {
-            $invalidCredentials = 'Invalid credentials';
-            $statusCode = $e->getMessage() === $invalidCredentials ? 401 : 500;
-            $errorMessage = $e->getMessage() === $invalidCredentials
-                ? $invalidCredentials
-                : 'Could not create token';
-
-            return response()->json(['error' => $errorMessage], $statusCode);
+                'error' => $isInvalidCredentials
+                    ? 'Credenciales incorrectas'
+                    : 'Error al generar el token',
+            ], $isInvalidCredentials ? 401 : 500);
         }
     }
 
@@ -76,19 +79,23 @@ class AuthController extends Controller
     {
         $user = $this->authService->GetUser();
 
-        return response()->json(compact('user'));
+        if (! $user) {
+            return response()->json(['error' => 'No autenticado'], 401);
+        }
+
+        // FIX: incluir roles en la respuesta del perfil
+        return response()->json([
+            'user' => $user->load('roles'),
+        ]);
     }
 
     public function logout(Request $request)
     {
         try {
             $this->authService->logout();
-
-            return response()->json([
-                'message' => 'Logout successful',
-            ], 200);
+            return response()->json(['message' => 'Sesión cerrada exitosamente'], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Could not logout'], 500);
+            return response()->json(['error' => 'Error al cerrar sesión'], 500);
         }
     }
 }

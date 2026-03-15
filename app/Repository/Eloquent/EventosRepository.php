@@ -25,22 +25,28 @@ class EventosRepository implements EventosInterfaces
     public function Eventosupdate($id, $data)
     {
         $model = Eventos::find($id);
-        if (! $model) {
-            return null;
-        }
+        if (! $model) return null;
         $model->update($data);
-
         return $model;
     }
 
     public function Eventosdelete($id)
     {
         $model = Eventos::find($id);
-        if (! $model) {
-            return false;
-        }
+        if (! $model) return false;
         $model->delete();
-
         return true;
+    }
+
+    // FIX: eventos del usuario autenticado
+    public function EventosgetByUser($userId)
+    {
+        return Eventos::where('creado_por', $userId)->orderBy('fecha_inicio')->get();
+    }
+
+    // FIX: eventos por tipo
+    public function EventosgetByTipo($tipo)
+    {
+        return Eventos::where('tipo_evento', $tipo)->orderBy('fecha_inicio')->get();
     }
 }

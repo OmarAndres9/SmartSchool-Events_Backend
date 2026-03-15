@@ -11,65 +11,65 @@ use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// -----------------------------------------------------------------------
-// Rutas Públicas (No requieren autenticación)
-// -----------------------------------------------------------------------
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
+/*
+|--------------------------------------------------------------------------
+| API Routes — v1
+|--------------------------------------------------------------------------
+| Todas las rutas se exponen bajo: /api/v1/...
+| El prefijo es configurado en bootstrap/app.php mediante apiPrefix.
+|
+| Pública:    POST /api/v1/login
+| Protegida:  GET  /api/v1/me  (requiere Bearer token JWT)
+|--------------------------------------------------------------------------
+*/
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rutas Públicas — no requieren autenticación
+// ─────────────────────────────────────────────────────────────────────────────
+Route::post('login',          [AuthController::class, 'login']);
+Route::post('register',       [AuthController::class, 'register']);
 Route::post('password/email', [\App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [\App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
 
-// -----------------------------------------------------------------------
-// Rutas Protegidas (Requieren autenticación)
-// -----------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// Rutas Protegidas — requieren JWT válido
+// ─────────────────────────────────────────────────────────────────────────────
 Route::middleware('auth:api')->group(function () {
 
-    // Rutas accesibles por cualquier usuario autenticado
+    // ── Sesión ────────────────────────────────────────────────────────────────
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('me', [AuthController::class, 'me']);
+    Route::get('me',      [AuthController::class, 'me']);
 
-    // Opciones para notificaciones (usualmente todos los usuarios pueden ver las suyas)
-    // Se deja abierto para cualquier rol autenticado, si es necesario restringirlo se puede mover a otro grupo
+    // ── Notificaciones — accesibles por cualquier usuario autenticado ─────────
     Route::apiResource('notificaciones', NotificacionesController::class);
 
-    // -------------------------------------------------------------------
-    // Rutas para Administradores
-    // Tienen control total sobre roles, permisos y usuarios
-    // -------------------------------------------------------------------
+    // ── Solo Administradores ──────────────────────────────────────────────────
     Route::middleware('role:admin')->group(function () {
-        Route::apiResource('roles', RoleController::class);
+        Route::apiResource('roles',       RoleController::class);
         Route::apiResource('permissions', PermissionController::class);
-        Route::apiResource('usuarios', UsuariosController::class);
+        Route::apiResource('usuarios',    UsuariosController::class);
 
-        // Endpoint Ejemplo Asignar Roles
+        // Asignar roles a un usuario
         Route::post('users/{user}/roles', function (Request $request, \App\Models\User $user) {
             $request->validate(['roles' => 'required|array']);
             $user->syncRoles($request->roles);
-
             return response()->json([
                 'message' => 'Roles asignados correctamente',
-                'user' => $user->load('roles'),
+                'user'    => $user->load('roles'),
             ]);
         });
     });
 
-    // -------------------------------------------------------------------
-    // Rutas para Organizadores (y también Administradores)
-    // Pueden gestionar eventos, recursos y reportes
-    // -------------------------------------------------------------------
+    // ── Administradores y Organizadores ──────────────────────────────────────
     Route::middleware('role:admin,organizador')->group(function () {
-        Route::apiResource('eventos', EventosController::class);
+
+        // IMPORTANTE: mis-eventos debe ir ANTES del apiResource de eventos
+        // para evitar que Laravel lo interprete como eventos/{id} con id="mis-eventos"
+        Route::get('eventos/mis-eventos', [EventosController::class, 'misEventos']);
+
+        Route::apiResource('eventos',  EventosController::class);
         Route::apiResource('recursos', RecursosController::class);
         Route::apiResource('reportes', ReportesController::class);
     });
-
-    // -------------------------------------------------------------------
-    // Rutas para Usuarios
-    // Si los usuarios regulares solo deben leer eventos, se pueden separar
-    // las rutas de lectura de las de escritura aquí.
-    // Por el momento, el middleware anterior controla acceso total.
-    // Puedes agregar excepciones como:
-    // Route::get('eventos', [EventosController::class, 'index'])->middleware('role:admin,organizador,usuario');
-    // -------------------------------------------------------------------
 
 });

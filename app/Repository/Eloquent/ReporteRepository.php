@@ -9,7 +9,7 @@ class ReporteRepository implements ReporteInterfaces
 {
     public function getAllReportes()
     {
-        return Reporte::all();
+        return Reporte::orderBy('created_at', 'desc')->get();
     }
 
     public function getReporteById($id)
@@ -22,13 +22,21 @@ class ReporteRepository implements ReporteInterfaces
         return Reporte::create($data);
     }
 
+    // FIX: retornaba int (filas afectadas), no el modelo — rompía el Resource
     public function updateReporte($id, array $data)
     {
-        return Reporte::where('id', $id)->update($data);
+        $model = Reporte::find($id);
+        if (! $model) return null;
+        $model->update($data);
+        return $model;
     }
 
+    // FIX: retornaba int, no bool — rompía el if(!$deleted) del controller
     public function deleteReporte($id)
     {
-        return Reporte::where('id', $id)->delete();
+        $model = Reporte::find($id);
+        if (! $model) return false;
+        $model->delete();
+        return true;
     }
 }

@@ -37,4 +37,15 @@ class EventosService
     {
         return $this->eventosRepository->Eventosdelete($id);
     }
+
+    // FIX: métodos añadidos
+    public function getByUser($userId)
+    {
+        return $this->eventosRepository->EventosgetByUser($userId);
+    }
+
+    public function getByTipo($tipo)
+    {
+        return $this->eventosRepository->EventosgetByTipo($tipo);
+    }
 }

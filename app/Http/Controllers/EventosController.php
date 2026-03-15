@@ -6,6 +6,7 @@ use App\Http\Requests\EventosRequest;
 use App\Http\Resources\EventosResource;
 use App\Services\EventosService;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EventosController extends Controller
 {
@@ -28,8 +29,8 @@ class EventosController extends Controller
     {
         $data = $request->validated();
 
-        // 👇 Asignamos el usuario creador
-        $data['creado_por'] = 1; // Cambia por auth()->id() si usas autenticación
+        // FIX: usar el usuario autenticado, no hardcodear id=1
+        $data['creado_por'] = JWTAuth::user()->id;
 
         $evento = $this->eventosService->create($data);
 
@@ -52,7 +53,6 @@ class EventosController extends Controller
     public function update(EventosRequest $request, $id)
     {
         $data = $request->validated();
-
         $evento = $this->eventosService->update($id, $data);
 
         if (! $evento) {
@@ -71,6 +71,15 @@ class EventosController extends Controller
         }
 
         return response()->json(null, 204);
+    }
+
+    // FIX: endpoint mis-eventos — filtra por usuario autenticado
+    public function misEventos()
+    {
+        $userId = JWTAuth::user()->id;
+        $eventos = $this->eventosService->getByUser($userId);
+
+        return EventosResource::collection($eventos);
     }
 
     public function getEventosByTipo($tipo)
