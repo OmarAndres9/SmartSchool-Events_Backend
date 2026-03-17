@@ -17,8 +17,9 @@ class NotificacionesRequest extends FormRequest
             'titulo'         => 'required|string|max:255',
             'mensaje'        => 'required|string',
             'tipo'           => 'required|string|in:success,warning,danger,info',
-            'canal'          => 'required|string|in:email,sms,app,push',
-            // FIX: estos los inyecta el controller automáticamente
+            // FIX: canales alineados con el frontend (Sistema, Email, WhatsApp, SMS)
+            // Se aceptan en minúsculas o con mayúsculas para mayor compatibilidad
+            'canal'          => 'required|string|in:Sistema,Email,WhatsApp,SMS,email,sms,app,push',
             'fecha_creacion' => 'sometimes|date',
             'id_usuario'     => 'sometimes|exists:users,id',
             'id_evento'      => 'nullable|exists:eventos,id',
@@ -29,7 +30,7 @@ class NotificacionesRequest extends FormRequest
     {
         return [
             'tipo.in'  => 'El tipo debe ser: success, warning, danger o info.',
-            'canal.in' => 'El canal debe ser: email, sms, app o push.',
+            'canal.in' => 'El canal debe ser: Sistema, Email, WhatsApp o SMS.',
         ];
     }
 }

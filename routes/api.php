@@ -15,41 +15,32 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API Routes — v1
 |--------------------------------------------------------------------------
-| Todas las rutas se exponen bajo: /api/v1/...
-| El prefijo es configurado en bootstrap/app.php mediante apiPrefix.
-|
-| Pública:    POST /api/v1/login
-| Protegida:  GET  /api/v1/me  (requiere Bearer token JWT)
-|--------------------------------------------------------------------------
+| Prefijo: /api/v1  (configurado en bootstrap/app.php)
 */
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Rutas Públicas — no requieren autenticación
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Rutas Públicas ────────────────────────────────────────────────────────────
 Route::post('login',          [AuthController::class, 'login']);
 Route::post('register',       [AuthController::class, 'register']);
 Route::post('password/email', [\App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [\App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Rutas Protegidas — requieren JWT válido
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Rutas Protegidas ──────────────────────────────────────────────────────────
 Route::middleware('auth:api')->group(function () {
 
-    // ── Sesión ────────────────────────────────────────────────────────────────
+    // Sesión
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me',      [AuthController::class, 'me']);
 
-    // ── Notificaciones — accesibles por cualquier usuario autenticado ─────────
+    // Notificaciones — cualquier usuario autenticado
     Route::apiResource('notificaciones', NotificacionesController::class);
 
-    // ── Solo Administradores ──────────────────────────────────────────────────
+    // Solo Administradores
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('roles',       RoleController::class);
         Route::apiResource('permissions', PermissionController::class);
         Route::apiResource('usuarios',    UsuariosController::class);
 
-        // Asignar roles a un usuario
+        // Asignar/cambiar roles a un usuario (Spatie syncRoles)
         Route::post('users/{user}/roles', function (Request $request, \App\Models\User $user) {
             $request->validate(['roles' => 'required|array']);
             $user->syncRoles($request->roles);
@@ -60,16 +51,32 @@ Route::middleware('auth:api')->group(function () {
         });
     });
 
-    // ── Administradores y Organizadores ──────────────────────────────────────
+    // Administradores y Organizadores
     Route::middleware('role:admin,organizador')->group(function () {
 
-        // IMPORTANTE: mis-eventos debe ir ANTES del apiResource de eventos
-        // para evitar que Laravel lo interprete como eventos/{id} con id="mis-eventos"
+        // IMPORTANTE: mis-eventos ANTES del apiResource para evitar conflicto con /{id}
         Route::get('eventos/mis-eventos', [EventosController::class, 'misEventos']);
 
         Route::apiResource('eventos',  EventosController::class);
         Route::apiResource('recursos', RecursosController::class);
         Route::apiResource('reportes', ReportesController::class);
-    });
 
+        // FIX: ruta para asignar un recurso a un evento
+        // Usada por DetalleRecurso.jsx → POST /api/v1/eventos/:id/recursos
+        Route::post('eventos/{evento}/recursos', function (Request $request, \App\Models\Eventos $evento) {
+            $request->validate([
+                'id_recurso' => 'required|exists:_recursos__table,id',
+                'cantidad'   => 'nullable|integer|min:1',
+            ]);
+
+            $evento->recursos()->syncWithoutDetaching([
+                $request->id_recurso => ['cantidad' => $request->cantidad ?? 1],
+            ]);
+
+            return response()->json([
+                'message'  => 'Recurso asignado al evento correctamente',
+                'evento'   => $evento->load('recursos'),
+            ]);
+        });
+    });
 });
