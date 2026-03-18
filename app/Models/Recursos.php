@@ -10,8 +10,11 @@ class Recursos extends Model
 
     protected $fillable = [
         'nombre',
+        'tipo',
         'ubicacion',
+        'capacidad',
         'estado',
+        'descripcion',
     ];
 
     public function eventos()

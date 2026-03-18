@@ -18,50 +18,51 @@ class RecursosController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = $request->query('per_page') ?? null;
+        $perPage  = $request->query('per_page') ?? null;
         $recursos = $this->recursosService->RecursosgetAll($perPage);
+
+        // FIX: cargar relación eventos para mostrar en Avisos
+        if (method_exists($recursos, 'load')) {
+            $recursos->load('eventos');
+        } else {
+            $recursos->each->load('eventos');
+        }
 
         return RecursosResource::collection($recursos);
     }
 
     public function store(RecursosRequest $request)
     {
-        $data = $request->validated();
+        $data    = $request->validated();
         $recurso = $this->recursosService->Recursoscreate($data);
 
         return (new RecursosResource($recurso))
-            ->response()
-            ->setStatusCode(201);
+            ->response()->setStatusCode(201);
     }
 
     public function show($id)
     {
         $recurso = $this->recursosService->RecursosgetById($id);
-        if (! $recurso) {
-            return response()->json(['message' => 'Recurso no encontrado'], 404);
-        }
+        if (!$recurso) return response()->json(['message' => 'Recurso no encontrado'], 404);
+
+        // FIX: cargar eventos asignados
+        $recurso->load('eventos');
 
         return new RecursosResource($recurso);
     }
 
     public function update(RecursosRequest $request, $id)
     {
-        $data = $request->validated();
+        $data    = $request->validated();
         $recurso = $this->recursosService->Recursosupdate($id, $data);
-        if (! $recurso) {
-            return response()->json(['message' => 'Recurso no encontrado'], 404);
-        }
-
+        if (!$recurso) return response()->json(['message' => 'Recurso no encontrado'], 404);
         return new RecursosResource($recurso);
     }
 
     public function destroy($id)
     {
         $deleted = $this->recursosService->Recursosdelete($id);
-        if (! $deleted) {
-            return response()->json(['message' => 'Recurso no encontrado'], 404);
-        }
-
+        if (!$deleted) return response()->json(['message' => 'Recurso no encontrado'], 404);
         return response()->json(null, 204);
     }
 }
