@@ -11,11 +11,10 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Limpiar caché de permisos de Spatie antes de crear roles ──────────
+        // Limpiar caché de permisos antes de crear roles
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ── Crear roles con guard_name explícito (requerido por Spatie) ────────
-        // firstOrCreate necesita TODOS los campos del índice único: name + guard_name
+        // Crear roles con guard_name 'api'
         $roles = [
             ['name' => 'admin',       'guard_name' => 'api'],
             ['name' => 'organizador', 'guard_name' => 'api'],
@@ -31,35 +30,62 @@ class AdminUserSeeder extends Seeder
             );
         }
 
-        // ── Crear usuario administrador ────────────────────────────────────────
+        // ── Administrador principal ────────────────────────────────────────────
         $admin = User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'admin@smartschool.com'],
             [
-                'name'           => 'Administrador',
-                'password'       => Hash::make('admin1234'),
+                'name'           => 'Administrador SmartSchool',
+                'password'       => Hash::make('Admin2026*'),
                 'tipo_documento' => 'CC',
-                'documento'      => '1234567890',
+                'documento'      => '1000000001',
             ]
         );
+        $admin->syncRoles(['admin']);
 
-        // Asignar rol admin (guard_name debe coincidir)
-        $admin->assignRole('admin');
-
-        // ── Crear usuario organizador de prueba ───────────────────────────────
+        // ── Organizador de eventos ─────────────────────────────────────────────
         $organizador = User::firstOrCreate(
             ['email' => 'organizador@smartschool.com'],
             [
-                'name'           => 'Organizador Demo',
-                'password'       => Hash::make('organiz1234'),
+                'name'           => 'Organizador de Eventos',
+                'password'       => Hash::make('Organiz2026*'),
                 'tipo_documento' => 'CC',
-                'documento'      => '9876543210',
+                'documento'      => '1000000002',
             ]
         );
+        $organizador->syncRoles(['organizador']);
 
-        $organizador->assignRole('organizador');
+        // ── Docente de prueba ──────────────────────────────────────────────────
+        $docente = User::firstOrCreate(
+            ['email' => 'docente@smartschool.com'],
+            [
+                'name'           => 'Docente Demo',
+                'password'       => Hash::make('Docente2026*'),
+                'tipo_documento' => 'CC',
+                'documento'      => '1000000003',
+            ]
+        );
+        $docente->syncRoles(['docente']);
 
+        // ── Estudiante de prueba ───────────────────────────────────────────────
+        $estudiante = User::firstOrCreate(
+            ['email' => 'estudiante@smartschool.com'],
+            [
+                'name'           => 'Estudiante Demo',
+                'password'       => Hash::make('Estud2026*'),
+                'tipo_documento' => 'TI',
+                'documento'      => '1000000004',
+            ]
+        );
+        $estudiante->syncRoles(['estudiante']);
+
+        $this->command->info('');
         $this->command->info('✅ Roles creados: admin, organizador, docente, estudiante, acudiente');
-        $this->command->info('✅ Usuario admin: admin@admin.com / admin1234');
-        $this->command->info('✅ Usuario organizador: organizador@smartschool.com / organiz1234');
+        $this->command->info('');
+        $this->command->info('👤 Usuarios de prueba:');
+        $this->command->info('   admin@smartschool.com       / Admin2026*');
+        $this->command->info('   organizador@smartschool.com / Organiz2026*');
+        $this->command->info('   docente@smartschool.com     / Docente2026*');
+        $this->command->info('   estudiante@smartschool.com  / Estud2026*');
+        $this->command->info('');
     }
 }
