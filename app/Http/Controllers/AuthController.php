@@ -60,7 +60,8 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => 'Login exitoso',
-                'user'    => $result['user'],
+                // FIX: cargar roles para que el frontend pueda leer user.roles[0].name
+                'user'    => $result['user']->load('roles'),
                 'token'   => $result['token'],
             ], 200);
 

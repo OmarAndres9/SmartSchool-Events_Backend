@@ -10,22 +10,17 @@ return new class extends Migration
     {
         Schema::create('eventos', function (Blueprint $table) {
             $table->id();
-
             $table->string('nombre');
             $table->text('descripcion')->nullable();
-
             $table->dateTime('fecha_inicio');
-            $table->dateTime('fecha_fin');
-
+            $table->dateTime('fecha_fin')->nullable();   // FIX: era NOT NULL
             $table->string('lugar')->nullable();
             $table->string('tipo_evento');
             $table->string('modalidad');
-            $table->string('grupo_destinado');
-
+            $table->string('grupo_destinado')->nullable(); // FIX: era NOT NULL
             $table->foreignId('creado_por')
                 ->constrained('users')
                 ->onDelete('cascade');
-
             $table->timestamps();
         });
     }
