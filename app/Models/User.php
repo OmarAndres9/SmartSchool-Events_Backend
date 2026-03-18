@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,11 +13,6 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, HasRoles, Notifiable;
 
-    /**
-     * Guard usado por Spatie Permission.
-     * Debe coincidir con el guard_name de los roles creados en el seeder.
-     * Como la API usa JWT con guard 'api', definimos esto aquí.
-     */
     protected $guard_name = 'api';
 
     protected $fillable = [
@@ -41,14 +37,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
     // ── JWT ───────────────────────────────────────────────────────────────────
+    public function getJWTIdentifier()       { return $this->getKey(); }
+    public function getJWTCustomClaims()     { return []; }
 
-    public function getJWTIdentifier()
+    // FIX: usar notificación personalizada que apunta al frontend React
+    public function sendPasswordResetNotification($token): void
     {
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

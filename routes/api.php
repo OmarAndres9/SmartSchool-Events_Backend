@@ -63,7 +63,9 @@ Route::middleware('auth:api')->group(function () {
 
         // FIX: ruta para asignar un recurso a un evento
         // Usada por DetalleRecurso.jsx → POST /api/v1/eventos/:id/recursos
-        Route::post('eventos/{evento}/recursos', function (Request $request, \App\Models\Eventos $evento) {
+        Route::post('eventos/{id}/recursos', function (Request $request, $id) {
+            $evento = \App\Models\Eventos::findOrFail($id);
+
             $request->validate([
                 'id_recurso' => 'required|exists:_recursos__table,id',
                 'cantidad'   => 'nullable|integer|min:1',
@@ -74,8 +76,8 @@ Route::middleware('auth:api')->group(function () {
             ]);
 
             return response()->json([
-                'message'  => 'Recurso asignado al evento correctamente',
-                'evento'   => $evento->load('recursos'),
+                'message' => 'Recurso asignado al evento correctamente',
+                'evento'  => $evento->load('recursos'),
             ]);
         });
     });
