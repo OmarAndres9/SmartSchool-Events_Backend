@@ -26,7 +26,7 @@ class ReporteRepository implements ReporteInterfaces
             $query->where('estado', $filtros['estado']);
         }
 
-        return $query->get();
+        return $query->with(['usuario', 'evento'])->get();
     }
 
     public function getReporteById($id)

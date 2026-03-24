@@ -9,7 +9,7 @@ class EventosRepository implements EventosInterfaces
 {
     public function EventosgetAll($perPage = null)
     {
-        return $perPage ? Eventos::paginate($perPage) : Eventos::all();
+        return $perPage ? Eventos::with('recursos')->paginate($perPage) : Eventos::with('recursos')->get();
     }
 
     public function EventosgetById($id)
@@ -41,12 +41,12 @@ class EventosRepository implements EventosInterfaces
     // FIX: eventos del usuario autenticado
     public function EventosgetByUser($userId)
     {
-        return Eventos::where('creado_por', $userId)->orderBy('fecha_inicio')->get();
+        return Eventos::with('recursos')->where('creado_por', $userId)->orderBy('fecha_inicio')->get();
     }
 
     // FIX: eventos por tipo
     public function EventosgetByTipo($tipo)
     {
-        return Eventos::where('tipo_evento', $tipo)->orderBy('fecha_inicio')->get();
+        return Eventos::with('recursos')->where('tipo_evento', $tipo)->orderBy('fecha_inicio')->get();
     }
 }

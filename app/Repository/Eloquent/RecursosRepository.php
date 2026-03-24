@@ -9,7 +9,7 @@ class RecursosRepository implements RecursosInterfaces
 {
     public function RecursosgetAll($perPage = null)
     {
-        return $perPage ? Recursos::paginate($perPage) : Recursos::all();
+        return $perPage ? Recursos::with('eventos')->paginate($perPage) : Recursos::with('eventos')->get();
     }
 
     public function RecursosgetById($id)

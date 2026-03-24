@@ -21,13 +21,6 @@ class RecursosController extends Controller
         $perPage  = $request->query('per_page') ?? null;
         $recursos = $this->recursosService->RecursosgetAll($perPage);
 
-        // FIX: cargar relación eventos para mostrar en Avisos
-        if (method_exists($recursos, 'load')) {
-            $recursos->load('eventos');
-        } else {
-            $recursos->each->load('eventos');
-        }
-
         return RecursosResource::collection($recursos);
     }
 
