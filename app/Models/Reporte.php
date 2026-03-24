@@ -24,6 +24,7 @@ class Reporte extends Model
 
     public function evento()
     {
-        return $this->belongsTo(Evento::class, 'id_evento');
+        // CORRECCIÓN: Evento::class no existe, debe ser Eventos::class
+        return $this->belongsTo(Eventos::class, 'id_evento');
     }
 }

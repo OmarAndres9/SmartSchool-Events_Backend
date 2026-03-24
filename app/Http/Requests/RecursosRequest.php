@@ -14,7 +14,8 @@ class RecursosRequest extends FormRequest
             'nombre'      => 'required|string|max:255',
             'tipo'        => 'nullable|string|max:255',
             'ubicacion'   => 'required|string|max:255',
-            'capacidad'   => 'nullable|integer|min:1',
+            // CORRECCIÓN: la BD tiene capacidad como string (varchar), no integer
+            'capacidad'   => 'nullable|string|max:50',
             'estado'      => 'required|string|in:disponible,ocupado,mantenimiento',
             'descripcion' => 'nullable|string',
         ];

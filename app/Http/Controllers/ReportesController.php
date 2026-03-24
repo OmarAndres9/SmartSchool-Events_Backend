@@ -20,7 +20,12 @@ class ReportesController extends Controller
 
     public function index(Request $request)
     {
-        $reportes = $this->reporteService->getAllReportes();
+        // CORRECCIÓN: el frontend envía fecha_inicio, fecha_fin, tipo, estado
+        // como query params — se propagan al service y repository para filtrar
+        $filtros = $request->only(['fecha_inicio', 'fecha_fin', 'tipo', 'estado']);
+        $filtros = array_filter($filtros, fn($v) => $v !== '' && $v !== null);
+
+        $reportes = $this->reporteService->getAllReportes($filtros);
         return ReporteResource::collection($reportes);
     }
 

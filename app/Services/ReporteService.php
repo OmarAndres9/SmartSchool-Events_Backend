@@ -13,9 +13,10 @@ class ReporteService
         $this->reporteRepository = $reporteRepository;
     }
 
-    public function getAllReportes()
+    // CORRECCIÓN: propagar filtros desde el controller al repository
+    public function getAllReportes(array $filtros = [])
     {
-        return $this->reporteRepository->getAllReportes();
+        return $this->reporteRepository->getAllReportes($filtros);
     }
 
     public function getReporteById($id)

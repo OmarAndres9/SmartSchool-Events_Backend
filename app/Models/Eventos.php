@@ -23,7 +23,9 @@ class Eventos extends Model
 
     public function recursos()
     {
-        return $this->belongsToMany(Recurso::class, '_evento_recurso_', 'evento_id', 'recurso_id')
+        // CORRECCIÓN: era Recurso::class (no existe), debe ser Recursos::class
+        return $this->belongsToMany(Recursos::class, '_evento_recurso_', 'evento_id', 'recurso_id')
+            ->using(EventoRecurso::class)
             ->withPivot('cantidad')
             ->withTimestamps();
     }

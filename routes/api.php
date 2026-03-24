@@ -61,24 +61,10 @@ Route::middleware('auth:api')->group(function () {
         Route::apiResource('recursos', RecursosController::class);
         Route::apiResource('reportes', ReportesController::class);
 
-        // FIX: ruta para asignar un recurso a un evento
-        // Usada por DetalleRecurso.jsx → POST /api/v1/eventos/:id/recursos
-        Route::post('eventos/{id}/recursos', function (Request $request, $id) {
-            $evento = \App\Models\Eventos::findOrFail($id);
-
-            $request->validate([
-                'id_recurso' => 'required|exists:_recursos__table,id',
-                'cantidad'   => 'nullable|integer|min:1',
-            ]);
-
-            $evento->recursos()->syncWithoutDetaching([
-                $request->id_recurso => ['cantidad' => $request->cantidad ?? 1],
-            ]);
-
-            return response()->json([
-                'message' => 'Recurso asignado al evento correctamente',
-                'evento'  => $evento->load('recursos'),
-            ]);
-        });
+        // CORRECCIÓN: asignar/desasignar recurso a evento — ahora en el controlador
+        // El frontend usaba POST /api/v1/eventos/:id/recursos con campo id_recurso
+        // CORRECCIÓN: el campo ahora es recurso_id (consistente con la BD)
+        Route::post('eventos/{id}/recursos',            [EventosController::class, 'asignarRecurso']);
+        Route::delete('eventos/{id}/recursos/{recurso}', [EventosController::class, 'desasignarRecurso']);
     });
 });

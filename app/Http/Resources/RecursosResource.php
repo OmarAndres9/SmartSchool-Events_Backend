@@ -9,10 +9,14 @@ class RecursosResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'        => $this->id,
-            'nombre'    => $this->nombre,
-            'ubicacion' => $this->ubicacion,
-            'estado'    => $this->estado,
+            'id'          => $this->id,
+            'nombre'      => $this->nombre,
+            // CORRECCIÓN: estos campos existían en BD pero no se retornaban
+            'tipo'        => $this->tipo,
+            'ubicacion'   => $this->ubicacion,
+            'capacidad'   => $this->capacidad,
+            'estado'      => $this->estado,
+            'descripcion' => $this->descripcion,
             // FIX: incluir eventos asignados para mostrarlos en Avisos
             'eventos'   => $this->whenLoaded('eventos', function () {
                 return $this->eventos->map(fn($ev) => [

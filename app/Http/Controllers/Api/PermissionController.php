@@ -27,7 +27,11 @@ class PermissionController extends Controller
             'name' => 'required|string|unique:permissions,name',
         ]);
 
-        $permission = Permission::create(['name' => $request->name]);
+        $permission = Permission::create([
+            'name'       => $request->name,
+            // CORRECCIÓN: guard_name debe ser 'api' para funcionar con JWT
+            'guard_name' => 'api',
+        ]);
 
         return response()->json($permission, 201);
     }

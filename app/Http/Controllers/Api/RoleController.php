@@ -28,7 +28,11 @@ class RoleController extends Controller
             'permissions' => 'nullable|array',
         ]);
 
-        $role = Role::create(['name' => $request->name]);
+        $role = Role::create([
+            'name'       => $request->name,
+            // CORRECCIÓN: guard_name debe ser 'api' para funcionar con JWT
+            'guard_name' => 'api',
+        ]);
 
         if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);

@@ -7,9 +7,26 @@ use App\Repository\Interfaces\ReporteInterfaces;
 
 class ReporteRepository implements ReporteInterfaces
 {
-    public function getAllReportes()
+    // CORRECCIÓN: el frontend envía fecha_inicio, fecha_fin, tipo, estado como query params
+    // El controller los ignoraba — ahora se filtran en la consulta
+    public function getAllReportes(array $filtros = [])
     {
-        return Reporte::orderBy('created_at', 'desc')->get();
+        $query = Reporte::orderBy('created_at', 'desc');
+
+        if (!empty($filtros['fecha_inicio'])) {
+            $query->where('fecha', '>=', $filtros['fecha_inicio']);
+        }
+        if (!empty($filtros['fecha_fin'])) {
+            $query->where('fecha', '<=', $filtros['fecha_fin']);
+        }
+        if (!empty($filtros['tipo'])) {
+            $query->where('tipo', $filtros['tipo']);
+        }
+        if (!empty($filtros['estado'])) {
+            $query->where('estado', $filtros['estado']);
+        }
+
+        return $query->get();
     }
 
     public function getReporteById($id)
@@ -22,7 +39,6 @@ class ReporteRepository implements ReporteInterfaces
         return Reporte::create($data);
     }
 
-    // FIX: retornaba int (filas afectadas), no el modelo — rompía el Resource
     public function updateReporte($id, array $data)
     {
         $model = Reporte::find($id);
@@ -31,7 +47,6 @@ class ReporteRepository implements ReporteInterfaces
         return $model;
     }
 
-    // FIX: retornaba int, no bool — rompía el if(!$deleted) del controller
     public function deleteReporte($id)
     {
         $model = Reporte::find($id);

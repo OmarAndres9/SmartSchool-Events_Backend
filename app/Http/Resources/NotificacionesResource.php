@@ -10,14 +10,17 @@ class NotificacionesResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'titulo' => $this->titulo,
-            'mensaje' => $this->mensaje,
-            'tipo' => $this->tipo,
-            'canal' => $this->canal,
+            'id'             => $this->id,
+            'titulo'         => $this->titulo,
+            'mensaje'        => $this->mensaje,
+            'tipo'           => $this->tipo,
+            'canal'          => $this->canal,
             'fecha_creacion' => $this->fecha_creacion,
-            'id_usuario' => $this->id_usuario,
-            'id_evento' => $this->id_evento,
+            'id_usuario'     => $this->id_usuario,
+            'id_evento'      => $this->id_evento,
+            // CORRECCIÓN: agregar timestamps para consistencia con el resto de resources
+            'created_at'     => $this->created_at,
+            'updated_at'     => $this->updated_at,
         ];
     }
 }

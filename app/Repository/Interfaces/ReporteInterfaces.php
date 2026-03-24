@@ -4,7 +4,8 @@ namespace App\Repository\Interfaces;
 
 interface ReporteInterfaces
 {
-    public function getAllReportes();
+    // CORRECCIÓN: firma actualizada para aceptar filtros desde el frontend
+    public function getAllReportes(array $filtros = []);
 
     public function getReporteById($id);
 
