@@ -10,19 +10,11 @@ class AuthRepository implements AuthInterfaces
 {
     public function AttemptLogin(array $credentials)
     {
-        try {
-            return JWTAuth::attempt($credentials);
-        } catch (JWTException $e) {
-            return false;
-        }
+        return auth('api')->attempt($credentials);
     }
 
     public function GetUser()
     {
-        try {
-            return JWTAuth::user();
-        } catch (JWTException $e) {
-            return null;
-        }
+        return auth('api')->user();
     }
 }
