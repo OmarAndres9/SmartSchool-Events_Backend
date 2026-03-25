@@ -9,12 +9,18 @@ class RecursosRepository implements RecursosInterfaces
 {
     public function RecursosgetAll($perPage = null)
     {
-        return $perPage ? Recursos::with('eventos')->paginate($perPage) : Recursos::with('eventos')->get();
+        // OPTIMIZACIÓN: no cargar todos los eventos de cada recurso en el listado
+        // (causaba un N+1 severo al listar recursos). Solo contamos los eventos.
+        $query = Recursos::withCount('eventos');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function RecursosgetById($id)
     {
-        return Recursos::find($id);
+        // Detalle individual sí carga los eventos asociados con columnas mínimas
+        return Recursos::with(['eventos:id,nombre,fecha_inicio,tipo_evento'])
+            ->find($id);
     }
 
     public function Recursoscreate($data)
@@ -24,23 +30,14 @@ class RecursosRepository implements RecursosInterfaces
 
     public function Recursosupdate($id, $data)
     {
-        $model = Recursos::find($id);
-        if (! $model) {
-            return null;
-        }
-        $model->update($data);
-
-        return $model;
+        $affected = Recursos::where('id', $id)->update($data);
+        if (! $affected) return null;
+        return Recursos::find($id);
     }
 
     public function Recursosdelete($id)
     {
-        $model = Recursos::find($id);
-        if (! $model) {
-            return false;
-        }
-        $model->delete();
-
-        return true;
+        return (bool) Recursos::destroy($id);
     }
 }
+

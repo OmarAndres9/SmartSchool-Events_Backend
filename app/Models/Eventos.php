@@ -18,15 +18,21 @@ class Eventos extends Model
         'modalidad',
         'grupo_destinado',
         'creado_por',
-
     ];
+
+    /**
+     * OPTIMIZACIÓN: NO usar $with = ['recursos'] a nivel de modelo.
+     * Cargar recursos siempre (global eager) genera queries innecesarias
+     * en listados paginados. Cada repositorio/controlador los carga
+     * explícitamente solo cuando los necesita.
+     */
 
     public function recursos()
     {
-        // CORRECCIÓN: era Recurso::class (no existe), debe ser Recursos::class
         return $this->belongsToMany(Recursos::class, '_evento_recurso_', 'evento_id', 'recurso_id')
             ->using(EventoRecurso::class)
             ->withPivot('cantidad')
             ->withTimestamps();
     }
 }
+

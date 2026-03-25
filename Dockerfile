@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Dependencias
+# ── Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensiones PHP necesarias para Laravel + PostgreSQL
+# ── Extensiones PHP necesarias para Laravel + PostgreSQL
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -21,20 +21,23 @@ RUN docker-php-ext-install \
     bcmath \
     opcache
 
-# Composer
+# ── Instalar Redis (extensión PHP)
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
+# ── Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# ── Directorio de trabajo
 WORKDIR /var/www/html
 
-# habilitar mod_rewrite y ajustar DocumentRoot a la carpeta public de Laravel
+# ── Configurar Apache y DocumentRoot
 RUN a2enmod rewrite && \
     sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
 
-# otorgar permisos a storage y cache para el usuario de Apache
+# ── Permisos para Laravel
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# puerto que exponemos para HTTP
+# ── Exponer puerto HTTP
 EXPOSE 80
-
-

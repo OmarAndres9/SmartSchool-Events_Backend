@@ -9,7 +9,10 @@ class NotificacionesRepository implements NotificacionesInterfaces
 {
     public function NotificacionesgetAll($perPage = null)
     {
-        return $perPage ? Notificaciones::paginate($perPage) : Notificaciones::all();
+        // OPTIMIZACIÓN: ordenar por más recientes primero; paginar siempre que sea posible
+        $query = Notificaciones::orderByDesc('created_at');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function NotificacionesgetById($id)
@@ -24,23 +27,14 @@ class NotificacionesRepository implements NotificacionesInterfaces
 
     public function Notificacionesupdate($id, $data)
     {
-        $model = Notificaciones::find($id);
-        if (! $model) {
-            return null;
-        }
-        $model->update($data);
-
-        return $model;
+        $affected = Notificaciones::where('id', $id)->update($data);
+        if (! $affected) return null;
+        return Notificaciones::find($id);
     }
 
     public function Notificacionesdelete($id)
     {
-        $model = Notificaciones::find($id);
-        if (! $model) {
-            return false;
-        }
-        $model->delete();
-
-        return true;
+        return (bool) Notificaciones::destroy($id);
     }
 }
+

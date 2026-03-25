@@ -7,14 +7,30 @@ use App\Repository\Interfaces\EventosInterfaces;
 
 class EventosRepository implements EventosInterfaces
 {
+    /**
+     * Columnas base que se devuelven en listados.
+     * Excluimos "descripcion" (TEXT largo) para que el listado sea rápido;
+     * el detalle individual sí la devuelve completa.
+     */
+    private const LIST_COLUMNS = [
+        'id', 'nombre', 'fecha_inicio', 'fecha_fin',
+        'lugar', 'tipo_evento', 'modalidad', 'grupo_destinado', 'creado_por',
+        'created_at', 'updated_at',
+    ];
+
     public function EventosgetAll($perPage = null)
     {
-        return $perPage ? Eventos::with('recursos')->paginate($perPage) : Eventos::with('recursos')->get();
+        $query = Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
+            ->select(self::LIST_COLUMNS);
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     public function EventosgetById($id)
     {
-        return Eventos::find($id);
+        // Detalle: sí incluye descripcion y recursos completos
+        return Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
+            ->find($id);
     }
 
     public function Eventoscreate($data)
@@ -24,29 +40,33 @@ class EventosRepository implements EventosInterfaces
 
     public function Eventosupdate($id, $data)
     {
-        $model = Eventos::find($id);
-        if (! $model) return null;
-        $model->update($data);
-        return $model;
+        // updateOrFail + firstOrFail en una sola query usando update directo
+        $affected = Eventos::where('id', $id)->update($data);
+        if (! $affected) return null;
+        return Eventos::find($id);
     }
 
     public function Eventosdelete($id)
     {
-        $model = Eventos::find($id);
-        if (! $model) return false;
-        $model->delete();
-        return true;
+        return (bool) Eventos::destroy($id);
     }
 
-    // FIX: eventos del usuario autenticado
     public function EventosgetByUser($userId)
     {
-        return Eventos::with('recursos')->where('creado_por', $userId)->orderBy('fecha_inicio')->get();
+        return Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
+            ->select(self::LIST_COLUMNS)
+            ->where('creado_por', $userId)
+            ->orderBy('fecha_inicio')
+            ->get();
     }
 
-    // FIX: eventos por tipo
     public function EventosgetByTipo($tipo)
     {
-        return Eventos::with('recursos')->where('tipo_evento', $tipo)->orderBy('fecha_inicio')->get();
+        return Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
+            ->select(self::LIST_COLUMNS)
+            ->where('tipo_evento', $tipo)
+            ->orderBy('fecha_inicio')
+            ->get();
     }
 }
+
