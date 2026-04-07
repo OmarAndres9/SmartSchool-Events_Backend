@@ -11,8 +11,8 @@ class UsuariosRepository implements UsuariosInterfaces
     public function getAll($perPage = null)
     {
         // FIX: cargar relación de roles para que el Resource los incluya
-        $query = User::with('roles');
-        return $perPage ? $query->paginate($perPage) : $query->get();
+        $query = User::with('roles')->orderBy('created_at', 'desc');
+        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
     }
 
     public function getById($id)

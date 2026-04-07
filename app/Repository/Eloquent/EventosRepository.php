@@ -21,9 +21,10 @@ class EventosRepository implements EventosInterfaces
     public function EventosgetAll($perPage = null)
     {
         $query = Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
-            ->select(self::LIST_COLUMNS);
+            ->select(self::LIST_COLUMNS)
+            ->orderBy('created_at', 'desc');
 
-        return $perPage ? $query->paginate($perPage) : $query->get();
+        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
     }
 
     public function EventosgetById($id)

@@ -11,9 +11,9 @@ class RecursosRepository implements RecursosInterfaces
     {
         // OPTIMIZACIÓN: no cargar todos los eventos de cada recurso en el listado
         // (causaba un N+1 severo al listar recursos). Solo contamos los eventos.
-        $query = Recursos::withCount('eventos');
+        $query = Recursos::withCount('eventos')->orderBy('created_at', 'desc');
 
-        return $perPage ? $query->paginate($perPage) : $query->get();
+        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
     }
 
     public function RecursosgetById($id)

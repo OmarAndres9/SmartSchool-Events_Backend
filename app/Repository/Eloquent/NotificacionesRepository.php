@@ -12,7 +12,7 @@ class NotificacionesRepository implements NotificacionesInterfaces
         // OPTIMIZACIÓN: ordenar por más recientes primero; paginar siempre que sea posible
         $query = Notificaciones::orderByDesc('created_at');
 
-        return $perPage ? $query->paginate($perPage) : $query->get();
+        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
     }
 
     public function NotificacionesgetById($id)

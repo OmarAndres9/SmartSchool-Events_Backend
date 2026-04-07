@@ -21,6 +21,19 @@ RUN docker-php-ext-install \
     bcmath \
     opcache
 
+# ── Configurar OPCache para mejorar el rendimiento de Laravel
+RUN { \
+    echo 'opcache.enable=1'; \
+    echo 'opcache.memory_consumption=256'; \
+    echo 'opcache.max_accelerated_files=10000'; \
+    echo 'opcache.interned_strings_buffer=16'; \
+    echo 'opcache.validate_timestamps=1'; \
+    echo 'opcache.revalidate_freq=2'; \
+    echo 'opcache.file_update_protection=2'; \
+    echo 'opcache.fast_shutdown=1'; \
+    echo 'opcache.enable_file_override=0'; \
+} > /usr/local/etc/php/conf.d/opcache-recommended.ini
+
 # ── Instalar Redis (extensión PHP)
 RUN pecl install redis \
     && docker-php-ext-enable redis
