@@ -18,16 +18,9 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
-    public function register(Request $request)
+    public function register(AuthRequest $request)
     {
-        $validatedData = $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|string|email|max:255|unique:users',
-            'password'       => 'required|string|min:6|confirmed',
-            'documento'      => 'required|string|max:12|unique:users',
-            'tipo_documento' => 'required|string|max:10',
-            'rol'            => 'required|string',
-        ]);
+        $validatedData = $request->validated();
 
         $user = User::create([
             'name'           => $validatedData['name'],
@@ -66,7 +59,7 @@ class AuthController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            $isInvalidCredentials = $e->getMessage() === 'Invalid credentials';
+            $isInvalidCredentials = $e->getMessage() === 'Credenciales incorrectas';
 
             return response()->json([
                 'error' => $isInvalidCredentials

@@ -29,7 +29,7 @@ class RolMiddleware
 
         // Verifica si el usuario tiene al menos uno de los roles pasados (Spatie hasAnyRole)
         if (! $user->hasAnyRole($roles)) {
-            return response()->json(['error' => 'Forbidden: Insufficient role permissions'], 403);
+            return response()->json(['error' => 'Forbidden: Roles Inválidos'], 403);
         }
 
         return $next($request);
