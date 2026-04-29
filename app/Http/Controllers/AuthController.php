@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthRequest;
 use App\Services\AutService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
@@ -18,16 +19,9 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
-    public function register(Request $request)
+    public function register(AuthRequest $request)
     {
-        $validatedData = $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|string|email|max:255|unique:users',
-            'password'       => 'required|string|min:6|confirmed',
-            'documento'      => 'required|string|max:12|unique:users',
-            'tipo_documento' => 'required|string|max:10',
-            'rol'            => 'required|string',
-        ]);
+        $validatedData = $request->validated();
 
         $user = User::create([
             'name'           => $validatedData['name'],
@@ -37,7 +31,6 @@ class AuthController extends Controller
             'tipo_documento' => $validatedData['tipo_documento'],
         ]);
 
-        // FIX: buscar el rol con guard_name='api' para que coincida con el seeder
         $roleName = strtolower($validatedData['rol']);
         $role = Role::where('name', $roleName)->where('guard_name', 'api')->first();
 
@@ -60,13 +53,12 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => 'Login exitoso',
-                // FIX: cargar roles para que el frontend pueda leer user.roles[0].name
                 'user'    => $result['user']->load('roles'),
                 'token'   => $result['token'],
             ], 200);
 
         } catch (\Exception $e) {
-            $isInvalidCredentials = $e->getMessage() === 'Invalid credentials';
+            $isInvalidCredentials = $e->getMessage() === 'Credenciales incorrectas';
 
             return response()->json([
                 'error' => $isInvalidCredentials
@@ -84,7 +76,6 @@ class AuthController extends Controller
             return response()->json(['error' => 'No autenticado'], 401);
         }
 
-        // FIX: incluir roles en la respuesta del perfil
         return response()->json([
             'user' => $user->load('roles'),
         ]);
@@ -93,6 +84,13 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
+            $user = $this->authService->GetUser();
+
+            // OPTIMIZACIÓN: invalidar caché de roles al cerrar sesión
+            if ($user) {
+                Cache::forget("user_roles_{$user->id}");
+            }
+
             $this->authService->logout();
             return response()->json(['message' => 'Sesión cerrada exitosamente'], 200);
         } catch (\Exception $e) {

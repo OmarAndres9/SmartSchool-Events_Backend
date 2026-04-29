@@ -21,7 +21,10 @@ class RecursosController extends Controller
         $perPage  = $request->query('per_page') ?? null;
         $recursos = $this->recursosService->RecursosgetAll($perPage);
 
-        return RecursosResource::collection($recursos);
+        return RecursosResource::collection($recursos)
+            ->response()->withHeaders([
+                'Cache-Control' => 'public, max-age=30, stale-while-revalidate=60',
+            ]);
     }
 
     public function store(RecursosRequest $request)

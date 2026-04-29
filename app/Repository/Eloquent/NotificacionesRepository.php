@@ -4,15 +4,19 @@ namespace App\Repository\Eloquent;
 
 use App\Models\Notificaciones;
 use App\Repository\Interfaces\NotificacionesInterfaces;
+use Illuminate\Support\Facades\Cache;
 
 class NotificacionesRepository implements NotificacionesInterfaces
 {
     public function NotificacionesgetAll($perPage = null)
     {
-        // OPTIMIZACIÓN: ordenar por más recientes primero; paginar siempre que sea posible
-        $query = Notificaciones::orderByDesc('created_at');
+        $page     = request()->query('page', 1);
+        $limit    = $perPage ?? 15;
+        $cacheKey = "notificaciones_list_p{$page}_l{$limit}";
 
-        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
+        return Cache::remember($cacheKey, 60, function () use ($limit) {
+            return Notificaciones::orderByDesc('created_at')->paginate($limit);
+        });
     }
 
     public function NotificacionesgetById($id)
@@ -22,19 +26,30 @@ class NotificacionesRepository implements NotificacionesInterfaces
 
     public function Notificacionescreate($data)
     {
-        return Notificaciones::create($data);
+        $notif = Notificaciones::create($data);
+        $this->flushListCache();
+        return $notif;
     }
 
     public function Notificacionesupdate($id, $data)
     {
         $affected = Notificaciones::where('id', $id)->update($data);
         if (! $affected) return null;
+        $this->flushListCache();
         return Notificaciones::find($id);
     }
 
     public function Notificacionesdelete($id)
     {
-        return (bool) Notificaciones::destroy($id);
+        $deleted = (bool) Notificaciones::destroy($id);
+        if ($deleted) $this->flushListCache();
+        return $deleted;
+    }
+
+    private function flushListCache(): void
+    {
+        for ($p = 1; $p <= 5; $p++) {
+            Cache::forget("notificaciones_list_p{$p}_l15");
+        }
     }
 }
-

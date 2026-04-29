@@ -6,6 +6,7 @@ use App\Http\Requests\EventosRequest;
 use App\Http\Resources\EventosResource;
 use App\Services\EventosService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EventosController extends Controller
@@ -22,14 +23,18 @@ class EventosController extends Controller
         $perPage = $request->query('per_page') ?? null;
         $eventos = $this->eventosService->getAll($perPage);
 
-        return EventosResource::collection($eventos);
+        // OPTIMIZACIÓN: Cache-Control con stale-while-revalidate.
+        // El browser sirve la respuesta anterior mientras valida en background.
+        return EventosResource::collection($eventos)
+            ->response()
+            ->withHeaders([
+                'Cache-Control' => 'public, max-age=30, stale-while-revalidate=60',
+            ]);
     }
 
     public function store(EventosRequest $request)
     {
         $data = $request->validated();
-
-        // FIX: usar el usuario autenticado, no hardcodear id=1
         $data['creado_por'] = JWTAuth::user()->id;
 
         $evento = $this->eventosService->create($data);
@@ -47,7 +52,6 @@ class EventosController extends Controller
             return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 
-        // CORRECCIÓN: cargar recursos asignados al evento
         $evento->load('recursos');
 
         return new EventosResource($evento);
@@ -55,7 +59,7 @@ class EventosController extends Controller
 
     public function update(EventosRequest $request, $id)
     {
-        $data = $request->validated();
+        $data   = $request->validated();
         $evento = $this->eventosService->update($id, $data);
 
         if (! $evento) {
@@ -85,7 +89,6 @@ class EventosController extends Controller
         }
 
         $request->validate([
-            // CORRECCIÓN: campo unificado como recurso_id (consistente con el modelo)
             'recurso_id' => 'required|exists:_recursos__table,id',
             'cantidad'   => 'nullable|integer|min:1',
         ]);
@@ -115,10 +118,9 @@ class EventosController extends Controller
         return response()->json(['message' => 'Recurso desasignado del evento correctamente']);
     }
 
-    // CORRECCIÓN: firma restaurada — se perdió en un refactor anterior
     public function misEventos()
     {
-        $userId = JWTAuth::user()->id;
+        $userId  = JWTAuth::user()->id;
         $eventos = $this->eventosService->getByUser($userId);
 
         return EventosResource::collection($eventos);

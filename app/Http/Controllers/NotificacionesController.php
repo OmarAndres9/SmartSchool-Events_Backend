@@ -19,12 +19,13 @@ class NotificacionesController extends Controller
 
     public function index(Request $request)
     {
-        // FIX: solo paginar si se pide explícitamente; si no, devolver todo
         $perPage = $request->query('per_page') ?? null;
 
         return NotificacionesResource::collection(
             $this->notificacionesService->NotificacionesgetAll($perPage)
-        );
+        )->response()->withHeaders([
+            'Cache-Control' => 'public, max-age=30, stale-while-revalidate=60',
+        ]);
     }
 
     public function show($id)

@@ -20,13 +20,14 @@ class ReportesController extends Controller
 
     public function index(Request $request)
     {
-        // CORRECCIÓN: el frontend envía fecha_inicio, fecha_fin, tipo, estado
-        // como query params — se propagan al service y repository para filtrar
         $filtros = $request->only(['fecha_inicio', 'fecha_fin', 'tipo', 'estado']);
         $filtros = array_filter($filtros, fn($v) => $v !== '' && $v !== null);
 
         $reportes = $this->reporteService->getAllReportes($filtros);
-        return ReporteResource::collection($reportes);
+        return ReporteResource::collection($reportes)
+            ->response()->withHeaders([
+                'Cache-Control' => 'public, max-age=30, stale-while-revalidate=60',
+            ]);
     }
 
     public function store(ReporteRequest $request)

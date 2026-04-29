@@ -4,15 +4,20 @@ namespace App\Repository\Eloquent;
 
 use App\Models\User;
 use App\Repository\Interfaces\UsuariosInterfaces;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class UsuariosRepository implements UsuariosInterfaces
 {
     public function getAll($perPage = null)
     {
-        // FIX: cargar relación de roles para que el Resource los incluya
-        $query = User::with('roles')->orderBy('created_at', 'desc');
-        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
+        $page     = request()->query('page', 1);
+        $limit    = $perPage ?? 15;
+        $cacheKey = "usuarios_list_p{$page}_l{$limit}";
+
+        return Cache::remember($cacheKey, 60, function () use ($limit) {
+            return User::with('roles')->orderBy('created_at', 'desc')->paginate($limit);
+        });
     }
 
     public function getById($id)
@@ -20,16 +25,16 @@ class UsuariosRepository implements UsuariosInterfaces
         return User::with('roles')->find($id);
     }
 
-    // FIX: hashear contraseña al crear usuario desde el panel admin
     public function create($data)
     {
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
-        return User::create($data);
+        $user = User::create($data);
+        $this->flushListCache();
+        return $user;
     }
 
-    // FIX: hashear contraseña solo si viene en la actualización
     public function update($id, $data)
     {
         $model = User::find($id);
@@ -38,11 +43,13 @@ class UsuariosRepository implements UsuariosInterfaces
         if (isset($data['password']) && $data['password']) {
             $data['password'] = Hash::make($data['password']);
         } else {
-            // No actualizar contraseña si no se envió
             unset($data['password']);
         }
 
         $model->update($data);
+        $this->flushListCache();
+        // Invalidar caché de roles de este usuario
+        Cache::forget("user_roles_{$id}");
         return $model->fresh('roles');
     }
 
@@ -51,6 +58,15 @@ class UsuariosRepository implements UsuariosInterfaces
         $model = User::find($id);
         if (! $model) return false;
         $model->delete();
+        $this->flushListCache();
+        Cache::forget("user_roles_{$id}");
         return true;
+    }
+
+    private function flushListCache(): void
+    {
+        for ($p = 1; $p <= 5; $p++) {
+            Cache::forget("usuarios_list_p{$p}_l15");
+        }
     }
 }

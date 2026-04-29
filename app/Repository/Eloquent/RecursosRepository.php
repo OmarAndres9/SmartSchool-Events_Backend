@@ -4,40 +4,58 @@ namespace App\Repository\Eloquent;
 
 use App\Models\Recursos;
 use App\Repository\Interfaces\RecursosInterfaces;
+use Illuminate\Support\Facades\Cache;
 
 class RecursosRepository implements RecursosInterfaces
 {
     public function RecursosgetAll($perPage = null)
     {
-        // OPTIMIZACIÓN: no cargar todos los eventos de cada recurso en el listado
-        // (causaba un N+1 severo al listar recursos). Solo contamos los eventos.
-        $query = Recursos::withCount('eventos')->orderBy('created_at', 'desc');
+        // OPTIMIZACIÓN: withCount en vez de with('eventos') en el listado.
+        // Solo agrega una subquery COUNT, evita cargar todos los eventos de cada recurso.
+        $page     = request()->query('page', 1);
+        $limit    = $perPage ?? 15;
+        $cacheKey = "recursos_list_p{$page}_l{$limit}";
 
-        return $query->paginate($perPage ?? 15); // Siempre pagina con 15 por defecto
+        return Cache::remember($cacheKey, 60, function () use ($limit) {
+            return Recursos::withCount('eventos')
+                ->orderBy('created_at', 'desc')
+                ->paginate($limit);
+        });
     }
 
     public function RecursosgetById($id)
     {
-        // Detalle individual sí carga los eventos asociados con columnas mínimas
+        // Detalle individual: sí carga eventos asociados.
         return Recursos::with(['eventos:id,nombre,fecha_inicio,tipo_evento'])
             ->find($id);
     }
 
     public function Recursoscreate($data)
     {
-        return Recursos::create($data);
+        $recurso = Recursos::create($data);
+        $this->flushListCache();
+        return $recurso;
     }
 
     public function Recursosupdate($id, $data)
     {
         $affected = Recursos::where('id', $id)->update($data);
         if (! $affected) return null;
+        $this->flushListCache();
         return Recursos::find($id);
     }
 
     public function Recursosdelete($id)
     {
-        return (bool) Recursos::destroy($id);
+        $deleted = (bool) Recursos::destroy($id);
+        if ($deleted) $this->flushListCache();
+        return $deleted;
+    }
+
+    private function flushListCache(): void
+    {
+        for ($p = 1; $p <= 5; $p++) {
+            Cache::forget("recursos_list_p{$p}_l15");
+        }
     }
 }
-
