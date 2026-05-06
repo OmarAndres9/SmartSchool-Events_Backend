@@ -10,40 +10,12 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-    environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_DATABASE=smartschool
-      - DB_USERNAME=smartschool
-      - DB_PASSWORD=root
-      - CACHE_STORE=redis
-      - QUEUE_CONNECTION=redis
-      - SESSION_DRIVER=redis
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=null
-      - REDIS_CLIENT=phpredis
+    env_file:
+      - .env
     networks:
       - smartschool-network
     depends_on:
-      - postgres
       - redis
-
-  postgres:
-    image: postgres:15
-    container_name: smartschool-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: smartschool
-      POSTGRES_USER: smartschool
-      POSTGRES_PASSWORD: root
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    networks:
-      - smartschool-network
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:alpine
@@ -57,6 +29,3 @@ services:
 networks:
   smartschool-network:
     driver: bridge
-
-volumes:
-  db-data:
