@@ -55,7 +55,12 @@ RUN a2enmod rewrite && \
     sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
 
 # ── Permisos para Laravel
-RUN mkdir -p /var/www/html/storage/app /var/www/html/storage/framework/{sessions,views,cache} /var/www/html/storage/logs /var/www/html/bootstrap/cache \
+RUN mkdir -p /var/www/html/storage/app \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/views \
+    /var/www/html/storage/framework/cache \
+    /var/www/html/storage/logs \
+    /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # ── Exponer puerto HTTP
