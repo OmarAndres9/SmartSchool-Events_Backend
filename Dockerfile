@@ -44,6 +44,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # ── Directorio de trabajo
 WORKDIR /var/www/html
 
+# ── Copiar la aplicación al contenedor
+COPY . /var/www/html
+
+# ── Instalar dependencias de PHP
+RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
+
 # ── Configurar Apache y DocumentRoot
 RUN a2enmod rewrite && \
     sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
