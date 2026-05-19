@@ -26,7 +26,7 @@ class AutService
             ];
         }
 
-        throw new \Exception('Invalid credentials');
+        throw new \Exception('Credenciales incorrectas');
     }
 
     public function logout()

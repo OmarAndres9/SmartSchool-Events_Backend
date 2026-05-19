@@ -1,4 +1,4 @@
-<?php
+git <?php
 
 namespace App\Http\Controllers;
 
@@ -58,7 +58,9 @@ class AuthController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            $isInvalidCredentials = $e->getMessage() === 'Credenciales incorrectas';
+            $message = strtolower($e->getMessage());
+            $isInvalidCredentials = str_contains($message, 'credenciales')
+                || str_contains($message, 'invalid credentials');
 
             return response()->json([
                 'error' => $isInvalidCredentials
