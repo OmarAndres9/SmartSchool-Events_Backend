@@ -15,12 +15,18 @@ class CorsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $allowedOrigins = [
-            config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173')),
-        ];
+        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173'));
+        $allowedOrigins = array_filter(array_map('trim', explode(',', $frontendUrl)));
         $origin = $request->headers->get('origin');
 
-        if (! in_array($origin, $allowedOrigins, true)) {
+        if (! $origin) {
+            return $next($request);
+        }
+
+        $isAllowed = in_array('*', $allowedOrigins, true) || in_array($origin, $allowedOrigins, true);
+        $allowOrigin = in_array('*', $allowedOrigins, true) ? '*' : $origin;
+
+        if (! $isAllowed) {
             if ($request->isMethod('OPTIONS')) {
                 return response()->json(['error' => 'Forbidden origin'], 403);
             }
@@ -29,11 +35,12 @@ class CorsMiddleware
         }
 
         $headers = [
-            'Access-Control-Allow-Origin'      => $origin,
+            'Access-Control-Allow-Origin'      => $allowOrigin,
             'Access-Control-Allow-Methods'     => 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token, Accept',
             'Access-Control-Expose-Headers'    => 'Authorization',
             'Access-Control-Max-Age'           => '86400',
+            'Vary'                             => 'Origin',
         ];
 
         if ($request->isMethod('OPTIONS')) {
