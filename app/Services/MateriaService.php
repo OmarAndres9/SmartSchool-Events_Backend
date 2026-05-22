@@ -37,4 +37,9 @@ class MateriaService
     {
         return $this->materiaRepository->Materiadelete($id);
     }
+
+    public function getByDocente($docenteId)
+    {
+        return $this->materiaRepository->MateriagetByDocente($docenteId);
+    }
 }

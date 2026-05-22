@@ -13,4 +13,6 @@ interface MateriaInterfaces
     public function Materiaupdate($id, $data);
 
     public function Materiadelete($id);
+
+    public function MateriagetByDocente($docenteId);
 }

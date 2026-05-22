@@ -49,6 +49,13 @@ class MateriaRepository implements MateriaInterfaces
         return $deleted;
     }
 
+    public function MateriagetByDocente($docenteId)
+    {
+        return Materia::where('docente_id', $docenteId)
+            ->orderBy('nombre')
+            ->get();
+    }
+
     private function getListCachePrefix(): string
     {
         return 'materias_list_v' . Cache::rememberForever('materias_list_version', fn () => 1) . '_';

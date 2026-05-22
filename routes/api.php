@@ -41,6 +41,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('eventos',                   [EventosController::class, 'index']);
     Route::get('eventos/mis-eventos',       [EventosController::class, 'misEventos']);
     Route::get('eventos/tipo/{tipo}',       [EventosController::class, 'getEventosByTipo']);
+    Route::get('eventos/historial',         [EventosController::class, 'historial']);
+    Route::get('eventos/proximos',          [EventosController::class, 'proximos']);
+    Route::get('eventos/favoritos',         [EventosController::class, 'favoritos']);
     Route::get('eventos/{id}/instancias',   [EventosController::class, 'instancias']);
     Route::get('eventos/{id}',              [EventosController::class, 'show']);
 
@@ -76,19 +79,16 @@ Route::middleware('auth:api')->group(function () {
     Route::get('eventos/{id}/inscritos',     [EventosController::class, 'inscritos']);
     Route::get('mis-inscripciones',          [EventosController::class, 'misInscripciones']);
 
-    // Favoritos
+    // Favoritos (mutaciones)
     Route::post('eventos/{id}/favorito',     [EventosController::class, 'marcarFavorito']);
     Route::delete('eventos/{id}/favorito',   [EventosController::class, 'desmarcarFavorito']);
-    Route::get('eventos/favoritos',          [EventosController::class, 'favoritos']);
 
     // Valoraciones
     Route::post('eventos/{id}/valorar',      [EventosController::class, 'valorar']);
     Route::get('eventos/{id}/valoraciones',  [EventosController::class, 'valoraciones']);
 
-    // Calendario e historial
+    // Calendario
     Route::get('calendario',                 [EventosController::class, 'calendario']);
-    Route::get('eventos/historial',          [EventosController::class, 'historial']);
-    Route::get('eventos/proximos',           [EventosController::class, 'proximos']);
 
     // Notificaciones — cualquier usuario autenticado
     Route::apiResource('notificaciones', NotificacionesController::class);
@@ -96,6 +96,13 @@ Route::middleware('auth:api')->group(function () {
     // Recursos — lectura pública (autenticados)
     Route::get('recursos',        [RecursosController::class, 'index']);
     Route::get('recursos/{id}',   [RecursosController::class, 'show']);
+
+    // Docente — gestión de notas
+    Route::middleware('role:admin,organizador,docente')->group(function () {
+        Route::get('docente/materias',    [\App\Http\Controllers\DocenteController::class, 'materias']);
+        Route::get('docente/estudiantes', [\App\Http\Controllers\DocenteController::class, 'estudiantes']);
+        Route::post('docente/notas',      [\App\Http\Controllers\DocenteController::class, 'guardarNota']);
+    });
 
     // Solo Administradores
     Route::middleware('role:admin')->group(function () {
