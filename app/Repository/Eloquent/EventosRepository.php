@@ -26,6 +26,7 @@ class EventosRepository implements EventosInterfaces
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
             return Eventos::select(self::LIST_COLUMNS)
+                ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($limit);
         });
@@ -64,6 +65,7 @@ class EventosRepository implements EventosInterfaces
     {
         return Cache::remember("eventos_user_{$userId}", 60, function () use ($userId) {
             return Eventos::select(self::LIST_COLUMNS)
+                ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
                 ->where('creado_por', $userId)
                 ->orderBy('fecha_inicio')
                 ->get();
@@ -75,6 +77,7 @@ class EventosRepository implements EventosInterfaces
         $key = 'eventos_tipo_' . str_replace(' ', '_', strtolower($tipo));
         return Cache::remember($key, 60, function () use ($tipo) {
             return Eventos::select(self::LIST_COLUMNS)
+                ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
                 ->where('tipo_evento', $tipo)
                 ->orderBy('fecha_inicio')
                 ->get();

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EventosRequest;
 use App\Http\Resources\EventosResource;
+use App\Models\Recursos;
 use App\Services\EventosService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EventosController extends Controller
@@ -52,8 +52,6 @@ class EventosController extends Controller
             return response()->json(['message' => 'Evento no encontrado'], 404);
         }
 
-        $evento->load('recursos');
-
         return new EventosResource($evento);
     }
 
@@ -97,6 +95,8 @@ class EventosController extends Controller
             $request->recurso_id => ['cantidad' => $request->cantidad ?? 1],
         ]);
 
+        Recursos::where('id', $request->recurso_id)->update(['estado' => 'ocupado']);
+
         $evento->load('recursos');
 
         return response()->json([
@@ -114,6 +114,11 @@ class EventosController extends Controller
         }
 
         $evento->recursos()->detach($recursoId);
+
+        $recurso = Recursos::find($recursoId);
+        if ($recurso && $recurso->eventos()->count() === 0) {
+            $recurso->update(['estado' => 'disponible']);
+        }
 
         return response()->json(['message' => 'Recurso desasignado del evento correctamente']);
     }
