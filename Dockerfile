@@ -60,8 +60,14 @@ RUN mkdir -p \
 # ── Instalar dependencias
 RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
 
-# ── Apache
-RUN a2enmod rewrite && \
+# ── Apache (rewrite + proxy/load balancer headers)
+RUN a2enmod rewrite remoteip && \
+    { \
+      echo 'RemoteIPHeader X-Forwarded-For'; \
+      echo 'RemoteIPInternalProxy 10.0.0.0/8'; \
+      echo 'RemoteIPInternalProxy 172.16.0.0/12'; \
+      echo 'RemoteIPInternalProxy 192.168.0.0/16'; \
+    } >> /etc/apache2/apache2.conf && \
     sed -ri 's!/var/www/html!/var/www/html/public!g' \
     /etc/apache2/sites-available/*.conf \
     /etc/apache2/apache2.conf
