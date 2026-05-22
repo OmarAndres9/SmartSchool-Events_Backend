@@ -34,5 +34,16 @@ class Eventos extends Model
             ->withPivot('cantidad')
             ->withTimestamps();
     }
+
+    public function inscripciones()
+    {
+        return $this->belongsToMany(User::class, 'evento_inscripciones', 'evento_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    public function inscritosCount()
+    {
+        return $this->inscripciones()->count();
+    }
 }
 

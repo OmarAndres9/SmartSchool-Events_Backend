@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Repository\Interfaces\AuthInterfaces;
 
-class AutService
+class AuthService
 {
     protected $authRepository;
 
@@ -27,6 +27,11 @@ class AutService
         }
 
         throw new \Exception('Credenciales incorrectas');
+    }
+
+    public function refresh()
+    {
+        return \Tymon\JWTAuth\Facades\JWTAuth::refresh(\Tymon\JWTAuth\Facades\JWTAuth::getToken());
     }
 
     public function logout()

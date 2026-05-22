@@ -16,7 +16,10 @@ class NotificacionesRepository implements NotificacionesInterfaces
         $cacheKey = "{$prefix}list_p{$page}_l{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
-            return Notificaciones::orderByDesc('created_at')->paginate($limit);
+            $userId = request()->user()?->id;
+            return Notificaciones::when($userId, fn($q) => $q->where('id_usuario', $userId))
+                ->orderByDesc('created_at')
+                ->paginate($limit);
         });
     }
 

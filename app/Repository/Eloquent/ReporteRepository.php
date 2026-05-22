@@ -26,9 +26,8 @@ class ReporteRepository implements ReporteInterfaces
             $query->where('estado', $filtros['estado']);
         }
 
-        // OPTIMIZACIÓN: usar paginación en lugar de get() para evitar cargar todos los registros
-        // El recurso ReporteResource no necesita relaciones adicionales, por lo que no cargamos eager loads innecesarios.
-        return $query->paginate(15); // 15 por página
+        $perPage = request()->query('per_page', 15);
+        return $query->paginate(min((int) $perPage, 100));
     }
 
     public function getReporteById($id)

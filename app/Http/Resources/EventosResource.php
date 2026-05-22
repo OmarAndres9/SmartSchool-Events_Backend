@@ -31,6 +31,7 @@ class EventosResource extends JsonResource
                     'pivot'    => ['cantidad' => $rec->pivot->cantidad ?? 1],
                 ]);
             }),
+            'inscritos_count' => $this->inscripciones_count ?? 0,
             'created_at'      => $this->created_at,
             'updated_at'      => $this->updated_at,
         ];

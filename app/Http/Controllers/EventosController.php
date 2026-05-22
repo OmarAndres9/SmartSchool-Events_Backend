@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EventosRequest;
+use App\Http\Requests\InscripcionRequest;
 use App\Http\Resources\EventosResource;
 use App\Models\Recursos;
+use App\Models\User;
 use App\Services\EventosService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EventosController extends Controller
@@ -134,6 +137,74 @@ class EventosController extends Controller
     public function getEventosByTipo($tipo)
     {
         $eventos = $this->eventosService->getByTipo($tipo);
+
+        return EventosResource::collection($eventos);
+    }
+
+    public function inscribir(InscripcionRequest $request, $id)
+    {
+        $evento = $this->eventosService->getById($id);
+
+        if (! $evento) {
+            return response()->json(['message' => 'Evento no encontrado'], 404);
+        }
+
+        $userId = $request->user_id ?? JWTAuth::user()->id;
+
+        $evento->inscripciones()->syncWithoutDetaching([$userId]);
+
+        Cache::forget("mis_inscripciones_{$userId}");
+
+        return response()->json([
+            'message' => 'Inscripción exitosa',
+            'inscritos' => $evento->inscripciones()->count(),
+        ]);
+    }
+
+    public function desinscribir($id)
+    {
+        $evento = $this->eventosService->getById($id);
+
+        if (! $evento) {
+            return response()->json(['message' => 'Evento no encontrado'], 404);
+        }
+
+        $userId = JWTAuth::user()->id;
+        $evento->inscripciones()->detach($userId);
+
+        Cache::forget("mis_inscripciones_{$userId}");
+
+        return response()->json([
+            'message' => 'Inscripción cancelada',
+        ]);
+    }
+
+    public function inscritos($id)
+    {
+        $evento = $this->eventosService->getById($id);
+
+        if (! $evento) {
+            return response()->json(['message' => 'Evento no encontrado'], 404);
+        }
+
+        $inscritos = $evento->inscripciones()->get(['users.id', 'users.name', 'users.email']);
+
+        return response()->json([
+            'inscritos' => $inscritos,
+            'total'     => $inscritos->count(),
+        ]);
+    }
+
+    public function misInscripciones()
+    {
+        $userId = JWTAuth::user()->id;
+
+        $eventos = Cache::remember("mis_inscripciones_{$userId}", 60, function () use ($userId) {
+            return User::find($userId)?->eventosInscritos()
+                ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
+                ->orderBy('fecha_inicio')
+                ->get() ?? collect();
+        });
 
         return EventosResource::collection($eventos);
     }

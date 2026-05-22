@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\RecursosController;
@@ -19,17 +20,33 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ── Rutas Públicas ────────────────────────────────────────────────────────────
-Route::post('login',          [AuthController::class, 'login']);
+Route::post('login',          [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('register',       [AuthController::class, 'register']);
-Route::post('password/email', [\App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('password/email', [\App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLinkEmail'])->middleware('throttle:3,5');
 Route::post('password/reset', [\App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
 
 // ── Rutas Protegidas ──────────────────────────────────────────────────────────
 Route::middleware('auth:api')->group(function () {
 
     // Sesión
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('me',      [AuthController::class, 'me']);
+    Route::post('logout',  [AuthController::class, 'logout']);
+    Route::get('me',       [AuthController::class, 'me']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+
+    // Eventos — lectura (todos los autenticados)
+    Route::get('eventos',                  [EventosController::class, 'index']);
+    Route::get('eventos/mis-eventos',      [EventosController::class, 'misEventos']);
+    Route::get('eventos/tipo/{tipo}',      [EventosController::class, 'getEventosByTipo']);
+    Route::get('eventos/{id}',             [EventosController::class, 'show']);
+
+    // Dashboard
+    Route::get('dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Inscripciones a eventos
+    Route::post('eventos/{id}/inscribir',    [EventosController::class, 'inscribir']);
+    Route::delete('eventos/{id}/desinscribir', [EventosController::class, 'desinscribir']);
+    Route::get('eventos/{id}/inscritos',     [EventosController::class, 'inscritos']);
+    Route::get('mis-inscripciones',          [EventosController::class, 'misInscripciones']);
 
     // Notificaciones — cualquier usuario autenticado
     Route::apiResource('notificaciones', NotificacionesController::class);
@@ -53,18 +70,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Administradores y Organizadores
     Route::middleware('role:admin,organizador')->group(function () {
-
-        // IMPORTANTE: mis-eventos ANTES del apiResource para evitar conflicto con /{id}
-        Route::get('eventos/mis-eventos', [EventosController::class, 'misEventos']);
-
-        Route::apiResource('eventos',  EventosController::class);
         Route::apiResource('recursos', RecursosController::class);
         Route::apiResource('reportes', ReportesController::class);
 
-        // CORRECCIÓN: asignar/desasignar recurso a evento — ahora en el controlador
-        // El frontend usaba POST /api/v1/eventos/:id/recursos con campo id_recurso
-        // CORRECCIÓN: el campo ahora es recurso_id (consistente con la BD)
-        Route::post('eventos/{id}/recursos',            [EventosController::class, 'asignarRecurso']);
+        Route::post('eventos',                  [EventosController::class, 'store']);
+        Route::put('eventos/{id}',               [EventosController::class, 'update']);
+        Route::delete('eventos/{id}',            [EventosController::class, 'destroy']);
+        Route::post('eventos/{id}/recursos',      [EventosController::class, 'asignarRecurso']);
         Route::delete('eventos/{id}/recursos/{recurso}', [EventosController::class, 'desasignarRecurso']);
     });
 });

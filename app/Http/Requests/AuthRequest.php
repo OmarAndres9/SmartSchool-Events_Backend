@@ -23,7 +23,7 @@ class AuthRequest extends FormRequest
             return [
                 'name'           => 'required|string|max:255',
                 'email'          => 'required|string|email|max:255|unique:users',
-                'password'       => 'required|string|min:6|confirmed',
+                'password'       => 'required|string|min:8|confirmed',
                 'documento'      => 'required|string|max:12|unique:users',
                 'tipo_documento' => 'required|string|max:10',
                 'rol'            => 'required|string',
@@ -53,7 +53,7 @@ class AuthRequest extends FormRequest
 
             'password.required' => 'El campo contraseña es requerido.',
             'password.string' => 'La contraseña debe ser texto.',
-            'password.min' => 'La contraseña debe tener mínimo 6 caracteres.',
+            'password.min' => 'La contraseña debe tener mínimo 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
 
             'documento.required' => 'El campo documento es requerido.',

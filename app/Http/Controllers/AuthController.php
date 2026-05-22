@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRequest;
-use App\Services\AutService;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +14,7 @@ class AuthController extends Controller
 {
     protected $authService;
 
-    public function __construct(AutService $authService)
+    public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
     }
@@ -81,6 +81,19 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user->load('roles'),
         ]);
+    }
+
+    public function refresh()
+    {
+        try {
+            $token = $this->authService->refresh();
+            return response()->json([
+                'message' => 'Token renovado',
+                'token'   => $token,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al renovar el token'], 401);
+        }
     }
 
     public function logout(Request $request)

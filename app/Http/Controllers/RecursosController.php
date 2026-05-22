@@ -41,9 +41,6 @@ class RecursosController extends Controller
         $recurso = $this->recursosService->RecursosgetById($id);
         if (!$recurso) return response()->json(['message' => 'Recurso no encontrado'], 404);
 
-        // FIX: cargar eventos asignados
-        $recurso->load('eventos');
-
         return new RecursosResource($recurso);
     }
 
