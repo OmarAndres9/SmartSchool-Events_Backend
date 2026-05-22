@@ -15,6 +15,7 @@ class InscripcionRequest extends FormRequest
     {
         return [
             'user_id' => 'nullable|exists:users,id',
+            'estado'  => 'nullable|in:pendiente,confirmada,cancelada,asistió',
         ];
     }
 }

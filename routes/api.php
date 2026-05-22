@@ -3,10 +3,14 @@
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CitaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EstudianteDashboardController;
 use App\Http\Controllers\EventosController;
 use App\Http\Controllers\NotificacionesController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecursosController;
+use App\Http\Controllers\RepresentanteDashboardController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Http\Request;
@@ -34,19 +38,57 @@ Route::middleware('auth:api')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
 
     // Eventos — lectura (todos los autenticados)
-    Route::get('eventos',                  [EventosController::class, 'index']);
-    Route::get('eventos/mis-eventos',      [EventosController::class, 'misEventos']);
-    Route::get('eventos/tipo/{tipo}',      [EventosController::class, 'getEventosByTipo']);
-    Route::get('eventos/{id}',             [EventosController::class, 'show']);
+    Route::get('eventos',                   [EventosController::class, 'index']);
+    Route::get('eventos/mis-eventos',       [EventosController::class, 'misEventos']);
+    Route::get('eventos/tipo/{tipo}',       [EventosController::class, 'getEventosByTipo']);
+    Route::get('eventos/{id}/instancias',   [EventosController::class, 'instancias']);
+    Route::get('eventos/{id}',              [EventosController::class, 'show']);
+
+    // Perfil
+    Route::get('me/perfil',       [ProfileController::class, 'perfil']);
+    Route::put('me/perfil',       [ProfileController::class, 'actualizarPerfil']);
 
     // Dashboard
     Route::get('dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Estudiante Dashboard
+    Route::get('estudiante/notas',        [EstudianteDashboardController::class, 'notas']);
+    Route::get('estudiante/promedios',    [EstudianteDashboardController::class, 'promedios']);
+    Route::get('estudiante/eventos',      [EstudianteDashboardController::class, 'eventos']);
+    Route::get('estudiante/periodos',     [EstudianteDashboardController::class, 'periodos']);
+
+    // Representante Dashboard
+    Route::get('representante/estudiantes',                            [RepresentanteDashboardController::class, 'estudiantes']);
+    Route::get('representante/estudiantes/{id}/notas',                 [RepresentanteDashboardController::class, 'notasEstudiante']);
+    Route::get('representante/estudiantes/{id}/promedios',             [RepresentanteDashboardController::class, 'promediosEstudiante']);
+    Route::get('representante/estudiantes/{id}/eventos',               [RepresentanteDashboardController::class, 'eventosEstudiante']);
+
+    // Citas
+    Route::get('citas',                     [CitaController::class, 'index']);
+    Route::post('citas',                    [CitaController::class, 'store']);
+    Route::get('citas/pendientes',          [CitaController::class, 'pendientes']);
+    Route::patch('citas/{id}/aprobar',      [CitaController::class, 'aprobar']);
+    Route::patch('citas/{id}/rechazar',     [CitaController::class, 'rechazar']);
 
     // Inscripciones a eventos
     Route::post('eventos/{id}/inscribir',    [EventosController::class, 'inscribir']);
     Route::delete('eventos/{id}/desinscribir', [EventosController::class, 'desinscribir']);
     Route::get('eventos/{id}/inscritos',     [EventosController::class, 'inscritos']);
     Route::get('mis-inscripciones',          [EventosController::class, 'misInscripciones']);
+
+    // Favoritos
+    Route::post('eventos/{id}/favorito',     [EventosController::class, 'marcarFavorito']);
+    Route::delete('eventos/{id}/favorito',   [EventosController::class, 'desmarcarFavorito']);
+    Route::get('eventos/favoritos',          [EventosController::class, 'favoritos']);
+
+    // Valoraciones
+    Route::post('eventos/{id}/valorar',      [EventosController::class, 'valorar']);
+    Route::get('eventos/{id}/valoraciones',  [EventosController::class, 'valoraciones']);
+
+    // Calendario e historial
+    Route::get('calendario',                 [EventosController::class, 'calendario']);
+    Route::get('eventos/historial',          [EventosController::class, 'historial']);
+    Route::get('eventos/proximos',           [EventosController::class, 'proximos']);
 
     // Notificaciones — cualquier usuario autenticado
     Route::apiResource('notificaciones', NotificacionesController::class);
@@ -78,5 +120,8 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('eventos/{id}',            [EventosController::class, 'destroy']);
         Route::post('eventos/{id}/recursos',      [EventosController::class, 'asignarRecurso']);
         Route::delete('eventos/{id}/recursos/{recurso}', [EventosController::class, 'desasignarRecurso']);
+        Route::post('eventos/{id}/archivos',       [EventosController::class, 'subirArchivo']);
+        Route::get('eventos/{id}/archivos',        [EventosController::class, 'archivos']);
+        Route::delete('eventos/{id}/archivos/{archivo}', [EventosController::class, 'eliminarArchivo']);
     });
 });

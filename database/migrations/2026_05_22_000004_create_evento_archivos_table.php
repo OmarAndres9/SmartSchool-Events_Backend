@@ -8,18 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('evento_inscripciones', function (Blueprint $table) {
+        Schema::create('evento_archivos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('evento_id')->constrained('eventos')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('estado', 20)->default('pendiente');
+            $table->string('nombre_original');
+            $table->string('ruta');
+            $table->string('tipo', 100);
+            $table->unsignedInteger('tamano');
             $table->timestamps();
-            $table->unique(['evento_id', 'user_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('evento_inscripciones');
+        Schema::dropIfExists('evento_archivos');
     }
 };

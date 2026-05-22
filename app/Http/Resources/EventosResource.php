@@ -32,6 +32,11 @@ class EventosResource extends JsonResource
                 ]);
             }),
             'inscritos_count' => $this->inscripciones_count ?? 0,
+            'rating_promedio' => $this->when($this->relationLoaded('valoraciones'), fn() => round($this->valoraciones->avg('puntuacion'), 1)),
+            'rating_count'    => $this->when($this->relationLoaded('valoraciones'), fn() => $this->valoraciones->count()),
+            'favoritos_count' => $this->favoritos_count ?? 0,
+            'visibilidad'     => $this->visibilidad ?? 'publico',
+            'es_recurrente'   => $this->es_recurrente,
             'created_at'      => $this->created_at,
             'updated_at'      => $this->updated_at,
         ];

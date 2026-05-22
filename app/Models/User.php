@@ -21,6 +21,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'tipo_documento',
         'documento',
+        'recordatorio_email',
+        'recordatorio_anticipacion_minutos',
     ];
 
     protected $hidden = [
@@ -31,8 +33,10 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'email_verified_at'                => 'datetime',
+            'password'                         => 'hashed',
+            'recordatorio_email'               => 'boolean',
+            'recordatorio_anticipacion_minutos' => 'integer',
         ];
     }
 
@@ -40,7 +44,49 @@ class User extends Authenticatable implements JWTSubject
     public function eventosInscritos()
     {
         return $this->belongsToMany(Eventos::class, 'evento_inscripciones', 'user_id', 'evento_id')
+            ->withPivot('estado')
             ->withTimestamps();
+    }
+
+    public function eventosFavoritos()
+    {
+        return $this->belongsToMany(Eventos::class, 'evento_favoritos', 'user_id', 'evento_id')
+            ->withTimestamps();
+    }
+
+    public function valoraciones()
+    {
+        return $this->hasMany(EventoValoracion::class, 'user_id');
+    }
+
+    public function notas()
+    {
+        return $this->hasMany(Nota::class, 'estudiante_id');
+    }
+
+    public function materiasDicta()
+    {
+        return $this->hasMany(Materia::class, 'docente_id');
+    }
+
+    public function estudiantesAsociados()
+    {
+        return $this->belongsToMany(User::class, 'representante_estudiantes', 'representante_id', 'estudiante_id');
+    }
+
+    public function representantes()
+    {
+        return $this->belongsToMany(User::class, 'representante_estudiantes', 'estudiante_id', 'representante_id');
+    }
+
+    public function citasSolicitadas()
+    {
+        return $this->hasMany(Cita::class, 'solicitante_id');
+    }
+
+    public function citasRecibidas()
+    {
+        return $this->hasMany(Cita::class, 'destinatario_id');
     }
 
     // ── JWT ───────────────────────────────────────────────────────────────────

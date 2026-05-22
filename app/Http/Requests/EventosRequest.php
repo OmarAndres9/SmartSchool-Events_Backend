@@ -14,16 +14,20 @@ class EventosRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre'          => 'required|string|max:255',
-            'descripcion'     => 'nullable|string',
-            'fecha_inicio'    => 'required|date',
-            // FIX: fecha_fin era required pero en el form es opcional
-            'fecha_fin'       => 'nullable|date|after_or_equal:fecha_inicio',
-            'lugar'           => 'nullable|string|max:255',
-            'tipo_evento'     => 'required|string|in:Academico,Cultural,Deportivo,Recreativo',
-            'modalidad'       => 'required|string|in:Presencial,Virtual,Mixta',
-            // FIX: grupo_destinado era required pero es opcional semánticamente
-            'grupo_destinado' => 'nullable|string|max:255',
+            'nombre'               => 'required|string|max:255',
+            'descripcion'          => 'nullable|string',
+            'fecha_inicio'         => 'required|date',
+            'fecha_fin'            => 'nullable|date|after_or_equal:fecha_inicio',
+            'lugar'                => 'nullable|string|max:255',
+            'tipo_evento'          => 'required|string|in:Academico,Cultural,Deportivo,Recreativo',
+            'modalidad'            => 'required|string|in:Presencial,Virtual,Mixta',
+            'grupo_destinado'      => 'nullable|string|max:255',
+            'es_recurrente'        => 'boolean',
+            'tipo_recurrencia'     => 'required_if:es_recurrente,true|in:diario,semanal,quincenal,mensual,anualmente',
+            'intervalo'            => 'nullable|integer|min:1',
+            'dias_semana'          => 'nullable|array',
+            'dias_semana.*'        => 'string|in:L,M,MX,J,V,S,D',
+            'fecha_fin_recurrencia' => 'nullable|date|after_or_equal:fecha_inicio',
         ];
     }
 

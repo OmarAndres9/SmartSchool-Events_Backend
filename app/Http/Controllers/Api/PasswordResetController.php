@@ -19,9 +19,7 @@ class PasswordResetController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ], [
-            'email.exists' => 'No encontramos una cuenta con ese correo electrónico.',
+            'email' => 'required|email',
         ]);
 
         // FIX: usar broker 'users' explícitamente

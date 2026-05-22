@@ -26,18 +26,26 @@ class EventosRepository implements EventosInterfaces
         $sortDir   = request()->query('order', 'desc');
         $fechaDesde = request()->query('fecha_desde');
         $fechaHasta = request()->query('fecha_hasta');
+        $soloRecurrentes = request()->boolean('recurrentes');
+        $visibilidad     = request()->query('visibilidad');
 
         $allowedSort = ['created_at', 'nombre', 'fecha_inicio', 'fecha_fin', 'tipo_evento', 'lugar'];
         if (! in_array($sortBy, $allowedSort)) $sortBy = 'created_at';
         if (! in_array(strtolower($sortDir), ['asc', 'desc'])) $sortDir = 'desc';
 
         $prefix   = $this->getListCachePrefix();
-        $cacheKey = "{$prefix}list_p{$page}_l{$limit}_s{$search}_o{$sortBy}_{$sortDir}_fd{$fechaDesde}_fh{$fechaHasta}";
+        $cacheKey = "{$prefix}list_p{$page}_l{$limit}_s{$search}_o{$sortBy}_{$sortDir}_fd{$fechaDesde}_fh{$fechaHasta}_r{$soloRecurrentes}_v{$visibilidad}";
 
-        return Cache::remember($cacheKey, 60, function () use ($limit, $search, $sortBy, $sortDir, $fechaDesde, $fechaHasta) {
+        return Cache::remember($cacheKey, 60, function () use ($limit, $search, $sortBy, $sortDir, $fechaDesde, $fechaHasta, $soloRecurrentes) {
             $query = Eventos::select(self::LIST_COLUMNS)
                 ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
-                ->withCount('inscripciones');
+                ->withCount(['inscripciones', 'favoritos']);
+
+            if ($soloRecurrentes) {
+                $query->where('es_recurrente', true);
+            } else {
+                $query->whereNull('evento_origen_id');
+            }
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -55,6 +63,11 @@ class EventosRepository implements EventosInterfaces
                 $query->where('fecha_fin', '<=', $fechaHasta);
             }
 
+            if ($visibilidad) {
+                $visArr = explode(',', $visibilidad);
+                $query->whereIn('visibilidad', $visArr);
+            }
+
             return $query->orderBy($sortBy, $sortDir)->paginate($limit);
         });
     }
@@ -63,7 +76,7 @@ class EventosRepository implements EventosInterfaces
     {
         // Detalle individual: sí carga recursos y descripcion completa.
         return Eventos::with(['recursos:id,nombre,tipo,ubicacion,estado'])
-            ->withCount('inscripciones')
+            ->withCount(['inscripciones', 'favoritos'])
             ->find($id);
     }
 
@@ -94,7 +107,7 @@ class EventosRepository implements EventosInterfaces
         return Cache::remember("eventos_user_{$userId}", 60, function () use ($userId) {
             return Eventos::select(self::LIST_COLUMNS)
                 ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
-                ->withCount('inscripciones')
+                ->withCount(['inscripciones', 'favoritos'])
                 ->where('creado_por', $userId)
                 ->orderBy('fecha_inicio')
                 ->get();
@@ -107,7 +120,7 @@ class EventosRepository implements EventosInterfaces
         return Cache::remember($key, 60, function () use ($tipo) {
             return Eventos::select(self::LIST_COLUMNS)
                 ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
-                ->withCount('inscripciones')
+                ->withCount(['inscripciones', 'favoritos'])
                 ->where('tipo_evento', $tipo)
                 ->orderBy('fecha_inicio')
                 ->get();

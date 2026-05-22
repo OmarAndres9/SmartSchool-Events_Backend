@@ -14,6 +14,14 @@ use App\Repository\Interfaces\NotificacionesInterfaces;
 use App\Repository\Interfaces\RecursosInterfaces;
 use App\Repository\Interfaces\ReporteInterfaces;
 use App\Repository\Interfaces\UsuariosInterfaces;
+use App\Repository\Interfaces\MateriaInterfaces;
+use App\Repository\Interfaces\PeriodoInterfaces;
+use App\Repository\Interfaces\NotaInterfaces;
+use App\Repository\Interfaces\CitaInterfaces;
+use App\Repository\Eloquent\MateriaRepository;
+use App\Repository\Eloquent\PeriodoRepository;
+use App\Repository\Eloquent\NotaRepository;
+use App\Repository\Eloquent\CitaRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -27,6 +35,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(EventosInterfaces::class,        EventosRepository::class);
         $this->app->bind(ReporteInterfaces::class,        ReporteRepository::class);
         $this->app->bind(NotificacionesInterfaces::class, NotificacionesRepository::class);
+        $this->app->bind(MateriaInterfaces::class,         MateriaRepository::class);
+        $this->app->bind(PeriodoInterfaces::class,         PeriodoRepository::class);
+        $this->app->bind(NotaInterfaces::class,            NotaRepository::class);
+        $this->app->bind(CitaInterfaces::class,            CitaRepository::class);
     }
 
     public function boot(): void {}

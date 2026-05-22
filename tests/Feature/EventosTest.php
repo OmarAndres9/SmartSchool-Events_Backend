@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Recursos;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -218,5 +219,81 @@ class EventosTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJson(['message' => 'Recurso desasignado del evento correctamente']);
+    }
+
+    // --- INSCRIPCIONES ---
+    public function test_estudiante_can_inscribirse_a_evento()
+    {
+        $org = $this->getOrganizadorUser();
+        $est = $this->getEstudianteUser();
+
+        $eventoRes = $this->actingAsJwt($org)->postJson('/api/v1/eventos', [
+            'nombre' => 'Evento Público',
+            'fecha_inicio' => now()->addDays(1)->toDateString(),
+            'tipo_evento' => 'Academico',
+            'modalidad' => 'Presencial',
+        ]);
+        $eventoId = $eventoRes->json('data.id');
+
+        $response = $this->actingAsJwt($est)->postJson("/api/v1/eventos/{$eventoId}/inscribir");
+
+        $response->assertStatus(200)->assertJson(['message' => 'Inscripción exitosa']);
+    }
+
+    public function test_estudiante_can_ver_mis_inscripciones()
+    {
+        $org = $this->getOrganizadorUser();
+        $est = $this->getEstudianteUser();
+
+        $eventoRes = $this->actingAsJwt($org)->postJson('/api/v1/eventos', [
+            'nombre' => 'Mi Evento',
+            'fecha_inicio' => now()->addDays(2)->toDateString(),
+            'tipo_evento' => 'Cultural',
+            'modalidad' => 'Virtual',
+        ]);
+        $eventoId = $eventoRes->json('data.id');
+
+        $this->actingAsJwt($est)->postJson("/api/v1/eventos/{$eventoId}/inscribir");
+
+        $response = $this->actingAsJwt($est)->getJson('/api/v1/mis-inscripciones');
+        $response->assertStatus(200);
+    }
+
+    public function test_estudiante_can_desinscribirse()
+    {
+        $org = $this->getOrganizadorUser();
+        $est = $this->getEstudianteUser();
+
+        $eventoRes = $this->actingAsJwt($org)->postJson('/api/v1/eventos', [
+            'nombre' => 'Evento a dejar',
+            'fecha_inicio' => now()->addDays(3)->toDateString(),
+            'tipo_evento' => 'Deportivo',
+            'modalidad' => 'Presencial',
+        ]);
+        $eventoId = $eventoRes->json('data.id');
+
+        $this->actingAsJwt($est)->postJson("/api/v1/eventos/{$eventoId}/inscribir");
+        $response = $this->actingAsJwt($est)->deleteJson("/api/v1/eventos/{$eventoId}/desinscribir");
+
+        $response->assertStatus(200)->assertJson(['message' => 'Inscripción cancelada']);
+    }
+
+    public function test_organizador_can_ver_inscritos()
+    {
+        $org = $this->getOrganizadorUser();
+        $est = $this->getEstudianteUser();
+
+        $eventoRes = $this->actingAsJwt($org)->postJson('/api/v1/eventos', [
+            'nombre' => 'Evento con asistentes',
+            'fecha_inicio' => now()->addDays(1)->toDateString(),
+            'tipo_evento' => 'Recreativo',
+            'modalidad' => 'Mixta',
+        ]);
+        $eventoId = $eventoRes->json('data.id');
+
+        $this->actingAsJwt($est)->postJson("/api/v1/eventos/{$eventoId}/inscribir");
+
+        $response = $this->actingAsJwt($org)->getJson("/api/v1/eventos/{$eventoId}/inscritos");
+        $response->assertStatus(200)->assertJsonStructure(['inscritos', 'total']);
     }
 }

@@ -58,15 +58,9 @@ class AuthController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            $message = strtolower($e->getMessage());
-            $isInvalidCredentials = str_contains($message, 'credenciales')
-                || str_contains($message, 'invalid credentials');
-
             return response()->json([
-                'error' => $isInvalidCredentials
-                    ? 'Credenciales incorrectas'
-                    : 'Error al generar el token',
-            ], $isInvalidCredentials ? 401 : 500);
+                'error' => 'Credenciales incorrectas',
+            ], 401);
         }
     }
 
