@@ -78,6 +78,18 @@ class AdminUserSeeder extends Seeder
         );
         $estudiante->syncRoles(['estudiante']);
 
+        // ── Acudiente de prueba ────────────────────────────────────────────────
+        $acudiente = User::firstOrCreate(
+            ['email' => 'acudiente@smartschool.com'],
+            [
+                'name'           => 'Acudiente Demo',
+                'password'       => Hash::make('Acud2026*'),
+                'tipo_documento' => 'CC',
+                'documento'      => '1000000005',
+            ]
+        );
+        $acudiente->syncRoles(['acudiente']);
+
         $this->command->info('');
         $this->command->info('✅ Roles creados: admin, organizador, docente, estudiante, acudiente');
         $this->command->info('');
@@ -86,6 +98,7 @@ class AdminUserSeeder extends Seeder
         $this->command->info('   organizador@smartschool.com / Organiz2026*');
         $this->command->info('   docente@smartschool.com     / Docente2026*');
         $this->command->info('   estudiante@smartschool.com  / Estud2026*');
+        $this->command->info('   acudiente@smartschool.com   / Acud2026*');
         $this->command->info('');
     }
 }

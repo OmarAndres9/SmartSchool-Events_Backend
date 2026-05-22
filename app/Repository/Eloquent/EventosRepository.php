@@ -36,7 +36,7 @@ class EventosRepository implements EventosInterfaces
         $prefix   = $this->getListCachePrefix();
         $cacheKey = "{$prefix}list_p{$page}_l{$limit}_s{$search}_o{$sortBy}_{$sortDir}_fd{$fechaDesde}_fh{$fechaHasta}_r{$soloRecurrentes}_v{$visibilidad}";
 
-        return Cache::remember($cacheKey, 60, function () use ($limit, $search, $sortBy, $sortDir, $fechaDesde, $fechaHasta, $soloRecurrentes) {
+        return Cache::remember($cacheKey, 60, function () use ($limit, $search, $sortBy, $sortDir, $fechaDesde, $fechaHasta, $soloRecurrentes, $visibilidad) {
             $query = Eventos::select(self::LIST_COLUMNS)
                 ->with(['recursos:id,nombre,tipo,ubicacion,estado'])
                 ->withCount(['inscripciones', 'favoritos']);
