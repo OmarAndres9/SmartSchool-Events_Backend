@@ -13,16 +13,6 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
-    <IfModule mod_headers.c>
-        # Allow only the SmartSchool front-end origin
-        SetEnvIf Origin "https://smartschool-events-front\.onrender\.com$" CORS_ALLOW_ORIGIN=$0
-        Header always set Access-Control-Allow-Origin "%{CORS_ALLOW_ORIGIN}e" env=CORS_ALLOW_ORIGIN
-        Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-CSRF-Token, Accept"
-        Header always set Access-Control-Expose-Headers "Authorization"
-        Header always set Access-Control-Max-Age "86400"
-    </IfModule>
-
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
