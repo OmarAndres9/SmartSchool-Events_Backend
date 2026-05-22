@@ -1,22 +1,21 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('_recursos__table', function (Blueprint $table) {
-            $table->integer('capacidad')->nullable()->change();
-        });
+        // Sanitizar datos no numéricos antes de cambiar el tipo
+        DB::statement('UPDATE "_recursos__table" SET "capacidad" = \'0\' WHERE "capacidad" IS NULL OR "capacidad" = \'\' OR "capacidad" !~ \'^\\d+$\'');
+        DB::statement('ALTER TABLE "_recursos__table" ALTER COLUMN "capacidad" TYPE integer USING "capacidad"::integer');
+        DB::statement('ALTER TABLE "_recursos__table" ALTER COLUMN "capacidad" SET DEFAULT NULL');
     }
 
     public function down(): void
     {
-        Schema::table('_recursos__table', function (Blueprint $table) {
-            $table->string('capacidad', 50)->nullable()->change();
-        });
+        DB::statement('ALTER TABLE "_recursos__table" ALTER COLUMN "capacidad" TYPE varchar(50)');
+        DB::statement('ALTER TABLE "_recursos__table" ALTER COLUMN "capacidad" SET DEFAULT \'0\'');
     }
 };

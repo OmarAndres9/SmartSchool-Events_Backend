@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::table('notificaciones', function (Blueprint $table) {
             $table->softDeletes();
         });
-        Schema::table('_reportes__table', function (Blueprint $table) {
+        Schema::table('_reportes_', function (Blueprint $table) {
             $table->softDeletes();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
         Schema::table('eventos', fn(Blueprint $t) => $t->dropSoftDeletes());
         Schema::table('_recursos__table', fn(Blueprint $t) => $t->dropSoftDeletes());
         Schema::table('notificaciones', fn(Blueprint $t) => $t->dropSoftDeletes());
-        Schema::table('_reportes__table', fn(Blueprint $t) => $t->dropSoftDeletes());
+        Schema::table('_reportes_', fn(Blueprint $t) => $t->dropSoftDeletes());
     }
 };
