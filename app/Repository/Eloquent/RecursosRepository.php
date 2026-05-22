@@ -10,11 +10,10 @@ class RecursosRepository implements RecursosInterfaces
 {
     public function RecursosgetAll($perPage = null)
     {
-        // OPTIMIZACIÓN: withCount en vez de with('eventos') en el listado.
-        // Solo agrega una subquery COUNT, evita cargar todos los eventos de cada recurso.
         $page     = request()->query('page', 1);
         $limit    = $perPage ?? 15;
-        $cacheKey = "recursos_list_p{$page}_l{$limit}";
+        $prefix   = $this->getListCachePrefix();
+        $cacheKey = "{$prefix}list_p{$page}_l{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
             return Recursos::withCount('eventos')
@@ -52,10 +51,14 @@ class RecursosRepository implements RecursosInterfaces
         return $deleted;
     }
 
+    private function getListCachePrefix(): string
+    {
+        return 'recursos_list_v' . Cache::rememberForever('recursos_list_version', fn () => 1) . '_';
+    }
+
     private function flushListCache(): void
     {
-        for ($p = 1; $p <= 5; $p++) {
-            Cache::forget("recursos_list_p{$p}_l15");
-        }
+        $version = Cache::rememberForever('recursos_list_version', fn () => 1);
+        Cache::forever('recursos_list_version', $version + 1);
     }
 }

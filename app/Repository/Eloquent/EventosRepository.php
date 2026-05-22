@@ -19,15 +19,10 @@ class EventosRepository implements EventosInterfaces
 
     public function EventosgetAll($perPage = null)
     {
-        // OPTIMIZACIÓN 1: sin with(['recursos']) en el listado.
-        // El join con la tabla pivot causaba ~200–400 ms extra por query.
-        // Los recursos solo se cargan en EventosgetById().
-        //
-        // OPTIMIZACIÓN 2: caché Redis de 60 s para el listado paginado.
-        // Elimina la query a PostgreSQL en requests repetidos (Dashboard, recargas).
         $page      = request()->query('page', 1);
         $limit     = $perPage ?? 15;
-        $cacheKey  = "eventos_list_p{$page}_l{$limit}";
+        $prefix    = $this->getListCachePrefix();
+        $cacheKey  = "{$prefix}list_p{$page}_l{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
             return Eventos::select(self::LIST_COLUMNS)
@@ -90,14 +85,14 @@ class EventosRepository implements EventosInterfaces
      * Invalida todas las entradas de caché del listado de eventos.
      * Se llama en create, update y delete para mantener consistencia.
      */
+    private function getListCachePrefix(): string
+    {
+        return 'eventos_list_v' . Cache::rememberForever('eventos_list_version', fn () => 1) . '_';
+    }
+
     private function flushListCache(): void
     {
-        Cache::tags(['eventos'])->flush();
-
-        // Fallback para drivers sin soporte de tags (file, database):
-        // invalidar páginas 1-5 manualmente.
-        for ($p = 1; $p <= 5; $p++) {
-            Cache::forget("eventos_list_p{$p}_l15");
-        }
+        $version = Cache::rememberForever('eventos_list_version', fn () => 1);
+        Cache::forever('eventos_list_version', $version + 1);
     }
 }

@@ -12,7 +12,8 @@ class NotificacionesRepository implements NotificacionesInterfaces
     {
         $page     = request()->query('page', 1);
         $limit    = $perPage ?? 15;
-        $cacheKey = "notificaciones_list_p{$page}_l{$limit}";
+        $prefix   = $this->getListCachePrefix();
+        $cacheKey = "{$prefix}list_p{$page}_l{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
             return Notificaciones::orderByDesc('created_at')->paginate($limit);
@@ -46,10 +47,14 @@ class NotificacionesRepository implements NotificacionesInterfaces
         return $deleted;
     }
 
+    private function getListCachePrefix(): string
+    {
+        return 'notificaciones_list_v' . Cache::rememberForever('notificaciones_list_version', fn () => 1) . '_';
+    }
+
     private function flushListCache(): void
     {
-        for ($p = 1; $p <= 5; $p++) {
-            Cache::forget("notificaciones_list_p{$p}_l15");
-        }
+        $version = Cache::rememberForever('notificaciones_list_version', fn () => 1);
+        Cache::forever('notificaciones_list_version', $version + 1);
     }
 }

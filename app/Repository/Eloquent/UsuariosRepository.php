@@ -13,7 +13,8 @@ class UsuariosRepository implements UsuariosInterfaces
     {
         $page     = request()->query('page', 1);
         $limit    = $perPage ?? 15;
-        $cacheKey = "usuarios_list_p{$page}_l{$limit}";
+        $prefix   = $this->getListCachePrefix();
+        $cacheKey = "{$prefix}list_p{$page}_l{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($limit) {
             return User::with('roles')->orderBy('created_at', 'desc')->paginate($limit);
@@ -63,10 +64,14 @@ class UsuariosRepository implements UsuariosInterfaces
         return true;
     }
 
+    private function getListCachePrefix(): string
+    {
+        return 'usuarios_list_v' . Cache::rememberForever('usuarios_list_version', fn () => 1) . '_';
+    }
+
     private function flushListCache(): void
     {
-        for ($p = 1; $p <= 5; $p++) {
-            Cache::forget("usuarios_list_p{$p}_l15");
-        }
+        $version = Cache::rememberForever('usuarios_list_version', fn () => 1);
+        Cache::forever('usuarios_list_version', $version + 1);
     }
 }
