@@ -93,6 +93,10 @@ Route::middleware('auth:api')->group(function () {
     // Notificaciones — cualquier usuario autenticado
     Route::apiResource('notificaciones', NotificacionesController::class);
 
+    // Recursos — lectura pública (autenticados)
+    Route::get('recursos',        [RecursosController::class, 'index']);
+    Route::get('recursos/{id}',   [RecursosController::class, 'show']);
+
     // Solo Administradores
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('roles',       RoleController::class);
@@ -112,7 +116,10 @@ Route::middleware('auth:api')->group(function () {
 
     // Administradores y Organizadores
     Route::middleware('role:admin,organizador')->group(function () {
-        Route::apiResource('recursos', RecursosController::class);
+        Route::post('recursos',               [RecursosController::class, 'store']);
+        Route::put('recursos/{id}',            [RecursosController::class, 'update']);
+        Route::delete('recursos/{id}',         [RecursosController::class, 'destroy']);
+
         Route::apiResource('reportes', ReportesController::class);
 
         Route::post('eventos',                  [EventosController::class, 'store']);
