@@ -114,6 +114,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('users/{user}/roles', function (Request $request, \App\Models\User $user) {
             $request->validate(['roles' => 'required|array']);
             $user->syncRoles($request->roles);
+            \Illuminate\Support\Facades\Cache::forget("user_roles_{$user->id}");
             return response()->json([
                 'message' => 'Roles asignados correctamente',
                 'user'    => $user->load('roles'),
